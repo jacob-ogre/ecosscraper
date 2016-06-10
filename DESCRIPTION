@@ -1,0 +1,22 @@
+Package: ecosscraper
+Type: Package
+Title: Scrape the ECOS Website, http://ecos.fws.gov
+Version: 0.1.0
+Author: Jacob Malcom
+Maintainer: Jacob Malcom <jmalcom@defenders.org>
+Description: The U.S. Fish and Wildlife Service's ECOS website contains a
+    significant amount of information about species listed as threatened or
+    endangered under the U.S. Endangered Species Act (plus candidate and
+    species petitioned for listing). But there is no way to download all of the
+    documents, tables, and text on ECOS, thus hampering further analysis. This
+    package provides tools and some data to enable scraping.
+License: BSD_2_clause + file LICENSE
+Depends: R (>= 2.10)
+LazyData: TRUE
+RoxygenNote: 5.0.1
+Imports:
+    dplyr,
+    httr,
+    parallel,
+    rvest,
+    stringr
