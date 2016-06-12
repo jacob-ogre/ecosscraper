@@ -1,6 +1,7 @@
 options("base_dir" = "~/Downloads")
 options("TE_list" = "http://ecos.fws.gov/tess_public/reports/ad-hoc-species-report?kingdom=V&kingdom=I&kingdom=P&status=E&status=T&status=EmE&status=EmT&status=EXPE&status=EXPN&status=SAE&status=SAT&status=C&status=P&fcrithab=on&fstatus=on&fspecrule=on&finvpop=on&fgroup=on&fleadreg=on&fspcode=on&header=Listed+Species")
-options("ECOS_sp_prefix" = "http://http://ecos.fws.gov/tess_public/profile/speciesProfile.action?spcode=")
+options("ECOS_sp_prefix" = "http://ecos.fws.gov/tess_public/profile/speciesProfile.action?spcode=")
+options("ECOS_prefix" = "http://ecos.fws.gov")
 
 #' Set the base directory for ecosscraper downloads.
 #'
