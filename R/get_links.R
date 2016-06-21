@@ -1,6 +1,7 @@
 #' Get a table of T, E, C, and P data.
 #'
-#' Use the URL in options()$TE_list to get data for fetching species data.
+#' Use the URL set in options()$TE_list to get a data.frame that includes links
+#' for fetching data for any species with pages on TESS.
 #'
 #' @return A data.frame with variables:
 #' \itemize{
@@ -15,14 +16,16 @@
 #'   \item Where_Listed
 #'   \item Species_Page
 #' }
+#' @importFrom rvest html_nodes html_table
+#' @importFrom xml2 read_html
 #' @export
 #' @examples
 #' all_spp <- get_TECP_table()
 #' head(all_spp)
 get_TECP_table <- function() {
   page <- xml2::read_html(options()$TE_list)
-  tabl <- html_nodes(page, "table")
-  all_spp <- as.data.frame(html_table(tabl))
+  tabl <- rvest::html_nodes(page, "table")
+  all_spp <- as.data.frame(rvest::html_table(tabl))
   names(all_spp) <- gsub(x = names(all_spp), 
                          pattern = ".", 
                          replacement = "_",
@@ -44,6 +47,8 @@ get_TECP_table <- function() {
 #' @param parallel TRUE (default) to try parallel scraping
 #' @return A data.frame with links, species, etc.
 #' @seealso \link{remove_silly_links} \link{get_species_links}
+#' @importFrom dplyr filter rbind_all
+#' @importFrom parallel mclapply
 #' @export
 #' @examples
 #' # one or more lines to demo the function
@@ -82,10 +87,11 @@ bulk_species_links <- function(data, ..., parallel = TRUE) {
 #'   \item{link}{The link, in absolute form, if available}
 #'   \item{text}{The anchor text of the <a> tag, if available}}
 #' @seealso \link{remove_silly_links} \link{bulk_species_links}
+#' @importFrom rvest html_nodes html_attr
 #' @export
 #' @examples
 #' # get_species_links("Ursus maritimus")
-get_species_links <- function(species, pause = TRUE, verbose = TRUE) {
+get_species_links <- function(df, species, pause = TRUE, verbose = TRUE) {
   # Want to warn, but also return an informative df
   err_res <- function(e, species) {
     print(paste("Warning:", e, species))
@@ -99,10 +105,12 @@ get_species_links <- function(species, pause = TRUE, verbose = TRUE) {
 
   if(pause == TRUE) Sys.sleep(runif(1, 0, 3))
   if(verbose) print(paste("Fetching page for", species))
-  base_ln <- try(get_species_url(species))
+  base_ln <- try(get_species_url(df, species))
   if(class(base_ln) == "try-error") err_res("URL not found for", species)
   page <- try(get_species_page(base_ln))
-  if(class(page[1]) == "try-error") err_res("Error getting page for", species)
+  if(is.null(page) | class(page[1]) == "try-error") {
+    err_res("Error getting page for", species)
+  }
   a_nodes <- try(rvest::html_nodes(page, "a"))
   if(class(a_nodes) == "try-error") err_res("No <a> nodes for", species)
   hrefs <- rvest::html_attr(a_nodes, "href")
@@ -147,7 +155,6 @@ get_species_page <- function(url) {
 #' @param x A link (href) string; may be relative or absolute
 #' @param base_ln A string indicating the base URL of current page
 #' @return The complete link, as available.
-#' @export
 #' @examples
 #' # None at the moment...
 fill_link <- function(x, base_ln) {
@@ -165,13 +172,14 @@ fill_link <- function(x, base_ln) {
 #' checks that the page is not the "No species profile" page.
 #' @param page An rvest read_html page
 #' @return logical; TRUE if a species profile, FALSE if "No species profile"
+#' @importFrom rvest html_text html_node
 #' @export
 #' @examples
 #' # one or more lines to demo the function
 is_species_profile <- function(page) {
-  h3 <- try(html_node(page, "h3"), silent = TRUE)
+  h3 <- try(rvest::html_node(page, "h3"), silent = TRUE)
   if(class(h3) != "try-error") {
-    if(html_text(h3) == "No species profile") return(FALSE)
+    if(rvest::html_text(h3) == "No species profile") return(FALSE)
   }
   return(TRUE)
 }
@@ -180,13 +188,15 @@ is_species_profile <- function(page) {
 #'
 #' Uses the species code in ecos_listed_spp data.frame to form the URL.
 #'
+#' @param df A data.frame returned from get_TECP_table
 #' @param species The scientific name of a species, as given by ECOS
 #' @return The URL of the species' ECOS profile
+#' @importFrom dplyr filter
 #' @export
 #' @examples
 #' get_species_url("Ursus arctos horribilis")
-get_species_url <- function(species) {
-  record <- dplyr::filter(ecos_listed_spp, Scientific_Name == species)
+get_species_url <- function(df, species) {
+  record <- dplyr::filter(df, Scientific_Name == species)
   if(dim(record)[1] > 0) {
     return(record$Species_Page[1])
   } else {
@@ -200,7 +210,7 @@ get_species_url <- function(species) {
 #'
 #' @param df A data.frame of species' links.
 #' @return df, filtered for only five-year review links
-#' @import dplyr
+#' @importFrom dplyr filter
 #' @export
 #' @examples
 #' # get_5yrev_links(all_links)
@@ -215,7 +225,7 @@ get_5yrev_links <- function(df) {
 #'
 #' @param df A data.frame of species' links.
 #' @return df, filtered for only recovery plan links
-#' @import dplyr
+#' @importFrom dplyr filter
 #' @export
 #' @examples
 #' # get_recovery_links(all_links)
@@ -230,7 +240,7 @@ get_recovery_links <- function(df) {
 #'
 #' @param df A data.frame of species' links.
 #' @return df, filtered for only Fed. Reg. links
-#' @import dplyr
+#' @importFrom dplyr filter
 #' @export
 #' @examples
 #' # get_fedreg_links(all_links)
@@ -243,7 +253,7 @@ get_fedreg_links <- function(df) {
 #'
 #' @param df A data.frame of species' links.
 #' @return df, filtered for links to conservation plans (SHA, HCP, CCAA)
-#' @import dplyr
+#' @importFrom dplyr filter
 #' @export
 #' @examples
 #' # get_cons_plan_links(all_links)
@@ -257,8 +267,8 @@ get_cons_plan_links <- function(df) {
 #' Uses the ECOS conservation plan page as the root and selects from dropdown.
 #'
 #' @return A data.frame with region, type, and suffix
-#' @import dplyr
-#' @import rvest
+#' @importFrom rvest html_nodes html_attr
+#' @importFrom xml2 read_html
 #' @export
 #' @examples
 #' # EXAMPLE
@@ -273,10 +283,10 @@ get_agreement_links <- function() {
   for(i in regions) {
     for(j in types) {
       pg <- paste0(base, i, suff, j)
-      page <- try(read_html(pg))
+      page <- try(xml2::read_html(pg))
       if(class(page[1]) == "list") {
-        form <- try(html_nodes(page, "select option"))
-        pgln <- try(html_attr(form, "value"))
+        form <- try(rvest::html_nodes(page, "select option"))
+        pgln <- try(rvest::html_attr(form, "value"))
         region <- c(region, rep(i, length(pgln)))
         type <- c(type, rep(j, length(pgln)))
         suffix <- c(suffix, pgln)

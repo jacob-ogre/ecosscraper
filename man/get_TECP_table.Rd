@@ -22,7 +22,8 @@ A data.frame with variables:
 }
 }
 \description{
-Use the URL in options()$TE_list to get data for fetching species data.
+Use the URL set in options()$TE_list to get a data.frame that includes links
+for fetching data for any species with pages on TESS.
 }
 \examples{
 all_spp <- get_TECP_table()

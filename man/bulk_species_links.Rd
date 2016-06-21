@@ -4,24 +4,29 @@
 \alias{bulk_species_links}
 \title{Gather all links for all or a subset of ECOS species.}
 \usage{
-bulk_species_links(data, subset = "All")
+bulk_species_links(data, ..., parallel = TRUE)
 }
 \arguments{
-\item{subset}{A string describing which group of links to fetch; one of
-\itemize{
-  \item `All`
-  \item `FWS Domestic`
-  \item `FWS Foreign`
-  \item `NMFS`
-}}
+\item{data}{A data.frame with}
+
+\item{...}{Zero or more filter conditions as used in \code{dplyr::filter}}
+
+\item{parallel}{TRUE (default) to try parallel scraping}
 }
 \value{
 A data.frame with links, species, etc.
 }
 \description{
-I need a better description of the function...
+Collects all of the links (<a href...>) from ECOS for species.
+}
+\details{
+Automates the process of gathering links, which may in turn be followed or,
+in the case of documents or tables, be downloaded.
 }
 \examples{
 # one or more lines to demo the function
+}
+\seealso{
+\link{remove_silly_links} \link{get_species_links}
 }
 

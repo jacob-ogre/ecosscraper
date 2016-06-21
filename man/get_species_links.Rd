@@ -4,23 +4,35 @@
 \alias{get_species_links}
 \title{Return all links on a species' ECOS page.}
 \usage{
-get_species_links(species, pause = TRUE)
+get_species_links(df, species, pause = TRUE, verbose = TRUE)
 }
 \arguments{
 \item{species}{Scientific name of a species, as given on ECOS}
+
+\item{pause}{TRUE for a 0-3 second pause to be nice to the server}
 }
 \value{
-A data.frame with
+A 1-row data.frame with variables:
 \describe{
   \item{Scientific_Name}{The species' scientific name, as given by ECOS}
-  \item{href}{The link as given in the <a> tag on the ECOS page}
+  \item{href}{The link as given on the ECOS page, if available}
   \item{link}{The link, in absolute form, if available}
   \item{text}{The anchor text of the <a> tag, if available}}
 }
 \description{
 Return a data.frame with links and their text, from a species' page on ECOS.
 }
+\details{
+This function has a bunch of \code{try} statements because errors were 
+very common during testing, though some of that may have been because of
+slow internet connections. In a future iteration I {may, will likely} change
+the search parameter to the species code (4-char alphanum), and fetch the
+species name using the code.
+}
 \examples{
-# None at the moment...
+# get_species_links("Ursus maritimus")
+}
+\seealso{
+\link{remove_silly_links} \link{bulk_species_links}
 }
 

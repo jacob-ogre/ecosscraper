@@ -4,9 +4,11 @@
 \alias{get_species_url}
 \title{Return the profile page on ECOS for a given species.}
 \usage{
-get_species_url(species)
+get_species_url(df, species)
 }
 \arguments{
+\item{df}{A data.frame returned from get_TECP_table}
+
 \item{species}{The scientific name of a species, as given by ECOS}
 }
 \value{
@@ -16,8 +18,6 @@ The URL of the species' ECOS profile
 Uses the species code in ecos_listed_spp data.frame to form the URL.
 }
 \examples{
-# get_species_url("Ursus arctos horribilis")
-#
-# [1] "http://ecos.fws.gov/tess_public/profile/speciesProfile?spcode=A001"
+get_species_url("Ursus arctos horribilis")
 }
 

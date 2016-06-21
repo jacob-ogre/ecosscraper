@@ -4,13 +4,13 @@
 \alias{get_species_page}
 \title{Return the ECOS species profile for a given species.}
 \usage{
-get_species_page(species)
+get_species_page(url)
 }
 \arguments{
-\item{species}{The scientific name of a species, as given in ECOS}
+\item{url}{The url for a species' ECOS profile}
 }
 \value{
-A page from \code{rvest::read_html}
+A page returned by \code{rvest::read_html}
 }
 \description{
 Each species in ECOS has its own profile page, which can be scraped; this
