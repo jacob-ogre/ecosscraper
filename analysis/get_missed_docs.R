@@ -32,7 +32,7 @@ save(missing_rp_search, file = "data-raw/missing_rp_search.rda")
 head(data.frame(missing_rp_search))
 
 # Now do the actual download
-cl <- makeCluster(7)
+cl <- makeCluster(2)
 doParallel::registerDoParallel(cl)
 tmp <- unique(missing_rp_search$link)
 res <- foreach(i = tmp, 
