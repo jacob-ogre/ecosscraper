@@ -121,7 +121,7 @@ get_tables <- function(sp) {
   p_tables <- rvest::html_nodes(cur_page, "table")
   tab_res <- lapply(p_tables, get_table)
   tab_upd <- lapply(tab_res, join_for_links, links = link_tbl, sp = species)
-  tab_names <- lapply(tab_upd, get_table_type)
+  tab_names <- lapply(tab_upd, function(x) suppressWarnings(get_table_type(x)))
   names(tab_upd) <- unlist(tab_names)
   tab_upd[["scrape_info"]] <- tab_1
   return(tab_upd)
