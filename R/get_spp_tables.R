@@ -112,11 +112,12 @@ get_table_type <- function(df) {
 #' get_tables(TECP_domestic$Species_Page[1])
 get_tables <- function(sp) {
   cur_date <- Sys.Date()
-  species <- dplyr::filter(TECP_domestic, Species_Page == sp)$Scientific_Name
+  species <- unique(dplyr::filter(TECP_domestic, 
+                           Species_Page == sp)$Scientific_Name)
   cur_page <- xml2::read_html(sp)
   page_txt <- rvest::html_text(cur_page)
   md5_hash <- digest::digest(page_txt)
-  tab_1 <- data.frame(Species = species, 
+  tab_1 <- data.frame(Species = species,
                       Page = sp, 
                       Date = cur_date, 
                       Page_txt_md5 = md5_hash,
