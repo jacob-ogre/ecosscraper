@@ -13,7 +13,6 @@ get_document <- function(link, subd, pause = TRUE) {
   dest <- make_pdf_dest(link, subd)
   if(!file.exists(dest)) {
     if(pause == TRUE) Sys.sleep(runif(1, 0.5, 3))
-    # print(URLencode(link))
     res <- try(httr::GET(URLencode(link), httr::write_disk(dest)))
     if(class(res) == "try-error") {
       # Try once more because the error may be a temp connection issue
