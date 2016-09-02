@@ -67,30 +67,18 @@ get_table_type <- function(df) {
                "Species")
   REV_TAB <- c("Date", "Title", "Doc_Link", "Species")
 
-  if(length(names(df)) == length(SP_TAB)) {
-    if(all(names(df) == SP_TAB)) {
-      return("SP_TAB") 
-    }
-  } else if(length(names(df)) == length(FR_TAB)) {
-    if(all(names(df) == FR_TAB)) {
-      return("FR_TAB")
-    }
-  } else if(length(names(df)) == length(CH_TAB)) {
-    if(all(names(df) == CH_TAB)) {
-      return("CH_TAB")
-    }
-  } else if(length(names(df)) == length(REC_TAB)) {
-    if(all(names(df) == REC_TAB)) {
-      return("REC_TAB")
-    }
-  } else if(length(names(df)) == length(DOC_TAB)) {
-    if(all(names(df) == DOC_TAB)) {
-      return("DOC_TAB")
-    }
-  } else if(length(names(df)) == length(REV_TAB)) {
-    if(all(names(df) == REV_TAB)) {
-      return("REV_TAB")
-    }
+  if(all(names(df) == SP_TAB)) {
+    return("SP_TAB") 
+  } else if(all(names(df) == FR_TAB)) {
+    return("FR_TAB")
+  } else if(all(names(df) == CH_TAB)) {
+    return("CH_TAB")
+  } else if(all(names(df) == REC_TAB)) {
+    return("REC_TAB")
+  } else if(all(names(df) == DOC_TAB)) {
+    return("DOC_TAB")
+  } else if(all(names(df) == REV_TAB)) {
+    return("REV_TAB")
   } else {
     return(names(df)[1])
   }

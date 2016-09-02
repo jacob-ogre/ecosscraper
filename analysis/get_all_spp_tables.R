@@ -8,10 +8,10 @@ data("TECP_domestic")
 
 # Let's try to get all of the ECOS tables...for domestic species, at least
 species <- unique(TECP_domestic$Species_Page)
-# ECOS_tabs <- parallel::mclapply(species, get_tables, mc.cores = 3)
-ECOS_tabs <- lapply(species, get_tables)
-names(ECOS_tabs) <- TECP_domestic$Scientific_Name
-save(ECOS_tabs, file = "data/ECOS_tabs.rda")
+ECOS_tabs <- parallel::mclapply(species, get_tables, mc.cores = 6)
+# ECOS_tabs <- lapply(species, get_tables)
+names(ECOS_tabs) <- unique(TECP_domestic$Scientific_Name)
+save(ECOS_tabs, file = "data-raw/ECOS_tabs.rda")
 
 test_SP_TAB <- distinct(bind_tables(ECOS_tabs, "SP_TAB"))
 test_FR_TAB <- distinct(bind_tables(ECOS_tabs, "FR_TAB"))
