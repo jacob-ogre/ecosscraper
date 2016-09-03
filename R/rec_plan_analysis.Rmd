@@ -1,0 +1,106 @@
+---
+title: "Analysis of ESA recovery plan dates"
+author: "Jacob Malcom"
+output: 
+  rmarkdown::html_document:
+    fig_caption: yes
+    toc: true
+    toc_depth: 3
+    toc_float: true
+---
+
+<script async defer src="https://hypothes.is/embed.js"></script>
+
+```{r setup, include = FALSE}
+library(ecosscraper)
+library(dplyr)
+library(ggplot2)
+library(ggthemes)
+library(knitr)
+library(stringr)
+library(viridis)
+data("recovery_plan_table")
+data("species_info_table")
+```
+
+Let's look at some recovery plan dates.
+
+```{r joins, echo = FALSE}
+combo <- dplyr::left_join(recovery_plan_table,
+                          species_info_table,
+                          by = "Species")
+names(combo)[1] <- "Rec_Plan_Date"
+combo$Rec_Plan_Date <- as.Date(combo$Rec_Plan_Date)
+names(combo)[8] <- "Date_Listed"
+combo$Date_Listed <- as.Date(combo$Date_Listed)
+combo$Date_Delta <- as.numeric(combo$Rec_Plan_Date - combo$Date_Listed)
+```
+
+## First glance
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+qplot(combo$Date_Delta / 365, geom = "histogram") +
+      labs(x = "Years between date listed and recovery plan date") +
+      ggtitle("Time to recovery plan", 
+              subtitle = "From ECOS tables") +
+      theme_hc() +
+      theme(plot.title=element_text(hjust = 0, size = 18))
+```
+
+Woo-hoo! A histogram! And there's something going on with the data!
+
+```{r filter1, echo = FALSE, warning = FALSE}
+neg_dates <- filter(combo, combo$Date_Delta <= 0)
+knitr::kable(head(neg_dates, 5))
+```
+
+A significant number (n = `r dim(neg_dates)[1]`) of records have a time of zero or fewer days between listing and the recover plan date. Looking even at the top few rows of data, it's pretty clear that the reason is the most-recent listing decision date is presented at the top of ECOS. Either these cases can be dropped _or_ I can mine the Federal Register notices data to derive the original listing dates.
+
+What about species with very long times?
+
+```{r filter2, echo = FALSE, warning = FALSE}
+hi_dates <- filter(combo, combo$Date_Delta > 40*365)
+dim(hi_dates)
+knitr::kable(head(hi_dates))
+```
+
+Most of these, but not all, are high in part because they are revisions. 
+
+## Initial by region
+
+A question that comes to mind is the duration by lead region (or agency, for NMFS). Will focus on just the positive values for the moment:
+
+```{r by_region, echo = FALSE, warning = FALSE}
+pos_val <- filter(combo, combo$Date_Delta > 0)
+pos_val$Region <- stringr::str_match(pos_val$`Lead Region`, 
+                                     pattern = "\\([A-Za-z0-9 ]+\\)")
+pos_val$Region <- stringr::str_replace(pos_val$Region,
+                                       "National Marine Fisheries Service",
+                                       "NMFS")
+
+ggplot(pos_val, aes(y = pos_val$Date_Delta / 365, x = pos_val$Region)) +
+  geom_boxplot() +
+  geom_violin(fill = "gray", alpha = 0.4, colour = NA) +
+  labs(x = "", y = "Time-to-Recovery Plan (years)") +
+  ggtitle("Time to recovery plan by region", 
+          subtitle = "From ECOS tables") +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+  theme_hc()
+
+kable(as.data.frame(table(pos_val$Region)))
+```
+
+## Final plans only
+
+The figures above are thrown off by the presence of revised recovery plans, draft plans, conservation strategies, and outlines. These should be removed for the primary analysis.
+
+```{r finals_only, echo = FALSE, warning = FALSE, message=FALSE}
+finals <- filter(pos_val, pos_val$`Plan Status` == "Final")
+qplot(finals$Date_Delta / 365, geom = "histogram") +
+      labs(x = "Years between listing and final recovery plan") +
+      ggtitle("Time to final recovery plan", 
+              subtitle = "From ECOS tables") +
+      theme_hc() +
+      theme(plot.title=element_text(hjust = 0, size = 18))
+```
+
