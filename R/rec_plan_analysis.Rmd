@@ -17,6 +17,7 @@ library(dplyr)
 library(ggplot2)
 library(ggthemes)
 library(knitr)
+library(lubridate)
 library(stringr)
 library(viridis)
 data("recovery_plan_table")
@@ -77,30 +78,150 @@ pos_val$Region <- stringr::str_match(pos_val$`Lead Region`,
 pos_val$Region <- stringr::str_replace(pos_val$Region,
                                        "National Marine Fisheries Service",
                                        "NMFS")
+pos_val$Region <- stringr::str_replace(pos_val$Region,
+                                       "\\(",
+                                       "")
+pos_val$Region <- stringr::str_replace(pos_val$Region,
+                                       "\\)",
+                                       "")
 
 ggplot(pos_val, aes(y = pos_val$Date_Delta / 365, x = pos_val$Region)) +
-  geom_boxplot() +
-  geom_violin(fill = "gray", alpha = 0.4, colour = NA) +
+  geom_violin(fill = "gray", alpha = 0.5, colour = NA) +
+  geom_boxplot(colour = "gray20", fill = NA) +
   labs(x = "", y = "Time-to-Recovery Plan (years)") +
   ggtitle("Time to recovery plan by region", 
           subtitle = "From ECOS tables") +
   theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
   theme_hc()
 
-kable(as.data.frame(table(pos_val$Region)))
+tmp <- as.data.frame(table(pos_val$Region))
+names(tmp) <- c("Region/Agency", "# Plans")
+kable(tmp, caption = "Distribution of plans (with positive time-to-plan) among FWS regions and agencies", align = "c")
 ```
 
 ## Final plans only
 
 The figures above are thrown off by the presence of revised recovery plans, draft plans, conservation strategies, and outlines. These should be removed for the primary analysis.
 
-```{r finals_only, echo = FALSE, warning = FALSE, message=FALSE}
+```{r finals_only, echo = FALSE, warning = FALSE, message=FALSE, fig.cap="_Note:_ Time may be biased low for species whose listing status changed since the original listing."}
 finals <- filter(pos_val, pos_val$`Plan Status` == "Final")
 qplot(finals$Date_Delta / 365, geom = "histogram") +
       labs(x = "Years between listing and final recovery plan") +
       ggtitle("Time to final recovery plan", 
-              subtitle = "From ECOS tables") +
+              subtitle = "From ECOS data") +
       theme_hc() +
       theme(plot.title=element_text(hjust = 0, size = 18))
 ```
 
+```{r fin_summary, echo = FALSE}
+tmp <- list(n = length(finals$Date_Delta),
+            min = min(finals$Date_Delta, na.rm = TRUE),
+            median = median(finals$Date_Delta, na.rm = TRUE),
+            mean = mean(finals$Date_Delta, na.rm = TRUE),
+            max = max(finals$Date_Delta, na.rm = TRUE))
+kable(as.data.frame(tmp), 
+      caption = "Summary statistics of time between listing and final recovery plan. Min, median, mean, and max are given in days.",
+      digits = 1,
+      align = "c")
+```
+
+## Update listing dates
+
+The top table for each species on ECOS includes a "Date Listed," but that date is the most recent date of a listing status change. For example, if a species is up- or down-listed, or if an Experimental population is listed, then that most-recent date is used. But we're interested in the original listing date because it is from that time when the Services should start recovery planning. 
+
+We can use the Federal Register table scraped from ECOS to try to get the original listing date for each species; we just have to find which FR notice corresponds to the listing. Unfortunately, there are >21K FR entries to sort through, and there is no single FR heading that indicates the final rule. But with a bunch of pattern matching and excluding, we can get a pretty good estimate.
+
+```{r est_orig_list}
+data("federal_register_table")
+t1 <- filter(federal_register_table, 
+             grepl(federal_register_table$Title, 
+                   pattern = "Determination|Determined|Listing|Listed as|Status|Endangered Species List|to be End|to be Thr|Appendix D|Final Rule for|Part 17|List[s]+ of Endangered|Amendments to List of Endangered Fish and Wildlife|Final Rule to List|Technical Corrections for Eight Wild|Emergency Rule to List|Addition.*List of End",
+                   ignore.case = TRUE))
+t2 <- filter(t1, 
+             !grepl(t1$Title, 
+                    pattern = "Notice of Review|Supplement to Review|Review of|Review for|Findings on|Proposed|Proposal|Status Rev",
+                    ignore.case = TRUE))
+# head(t2$Title, 10)
+# dim(t2)
+# spp_cov <- unique(t2$Species)
+# setdiff(unique(recovery_plan_table$Species), spp_cov)
+
+t2$Date <- as.Date(t2$Date)
+earliest <- aggregate(Date ~ Species, t2, min, na.rm = TRUE) 
+kable(head(earliest, 5), align = c("l", "c"))
+```
+
+```{r upd_list_date}
+updated <- left_join(combo, earliest, by = "Species")
+updated$List_Diff <- as.numeric(updated$Date_Listed - updated$Date)
+diff <- filter(updated, updated$List_Diff > 45)
+
+orig_ls <- as.Date(rep("2000-01-01", length(updated$Title)))
+for(i in 1:length(orig_ls)) {
+  if(!is.na(updated$List_Diff[i]) & updated$List_Diff[i] > 45) {
+    orig_ls[i] <- updated$Date[i]
+  } else {
+    orig_ls[i] <- updated$Date_Listed[i]
+  }
+}
+updated$Orig_List <- orig_ls
+updated$Upd_Elapsed <- as.numeric(updated$Rec_Plan_Date - updated$Orig_List)
+updated$Orig_Elapsed <- as.numeric(updated$Rec_Plan_Date - updated$Date_Listed)
+
+median(updated$Upd_Elapsed, na.rm = TRUE)
+median(updated$Orig_Elapsed, na.rm = TRUE)
+```
+
+As expected, using the original (approx) listing date, the median elapsed time-to-recovery plan is longer than using the raw data. Now, with the updated (original) listing dates, we can look at the distribution of times elapsed. (Note that we also only want the original final plans.)
+
+```{r upd_dist}
+final <- filter(updated, updated$`Plan Status` == "Final")
+neg <- filter(final, final$Upd_Elapsed <= 0)
+
+qplot(final$Upd_Elapsed / 365, geom = "histogram") +
+      labs(x = "Years between date listed and recovery plan date") +
+      ggtitle("Time to recovery plan", 
+              subtitle = "with original listing dates") +
+      theme_hc() +
+      theme(plot.title=element_text(hjust = 0, size = 18))
+```
+
+Clearly the negative values are errors...except they're not all errors. Some species were listed _after_ the recovery plan they are a part of was written. Based on an initial examination, these valid negative years species tend to be part of multi-species plans, e.g., (Ohlone tiger beetle)[https://ecos.fws.gov/ecp0/profile/speciesProfile?spcode=I0OW]. But some are errors, e.g., Ring Pink (Mussel), which has a 1991 recovery plan and an experimental population listed in 2007. Further inspection shows that almost all of these errors are for experimental populations, so we should exclude those as well.
+
+```{r no_exp}
+no_exp <- filter(final, !grepl(final$Status, pattern = "Experimental"))
+neg <- filter(no_exp, no_exp$Upd_Elapsed <= 0)
+
+qplot(no_exp$Upd_Elapsed / 365, geom = "histogram") +
+      labs(x = "Years between date listed and recovery plan date") +
+      ggtitle("Time to recovery plan", 
+              subtitle = "no experimental populations") +
+      theme_hc() +
+      theme(plot.title=element_text(hjust = 0, size = 18))
+```
+
+I think this is the valid final data set (n = `r dim(no_exp)[1]`), and all of the negative values (n = `r dim(neg)[1]`) appear to be correct. 
+
+```{r save_dat, echo = FALSE}
+filtered_recplan_df <- no_exp
+save(filtered_recplan_df, file = "data/filtered_recplan_df.rda")
+```
+
+## Percentiles
+
+I'm curious about the distribution of times to recovery plans.
+
+```{r percentile}
+duration <- sort(no_exp$Upd_Elapsed / 365, decreasing = FALSE)
+order <- seq(1:length(durations))
+quantile <- order / max(order)
+pctile <- data.frame(duration, order, quantile, stringsAsFactors = FALSE)
+
+ggplot(pctile, aes(y = duration, x = quantile)) +
+  geom_line() +
+  ggtitle("Time to recovery plan", 
+          subtitle = "As a function of quantiles") +
+  labs(x = "Quantile",
+       y = "Time-to-recovery plan (years)") +
+  theme_hc()
+```
