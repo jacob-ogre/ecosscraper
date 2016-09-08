@@ -98,6 +98,8 @@ listed <- select(listed, -`Plan Action Status`, -Doc_Link, -Status, -`Lead Regio
                   -`Where Listed`)
 listed$Year_Listed <- year(listed$First_Listed)
 listed$Year_Plan <- year(listed$Rec_Plan_Date)
+
+no_plan <- filter(listed, is.na(listed$Year_Plan))
 ```
 
 ## Analyses
@@ -140,6 +142,33 @@ ggplot(n_list_df, aes(y = n_listed, x = years)) +
   theme(text = element_text(family = "Open Sans"))
 ```
 
+We can also view this as the proportion of species listed in each year that have no recovery plan as of September, 2016.
+
+```{r prop_no_plan, echo = FALSE, warning=FALSE}
+n_listed <- unlist(lapply(years, 
+                          function(x) sum(listed$Year_Listed == x, na.rm = TRUE)))
+n_plans <- unlist(lapply(years, 
+                         function(x) {
+                           sub <- filter(listed, Year_Listed == x)
+                           sum(!is.na(sub$Year_Plan))
+                         }))
+n_list_df <- data.frame(years, n_listed, n_plans)
+n_list_df$pct_w_plan <- n_list_df$n_plans / n_list_df$n_listed
+
+gg <- ggplot(n_list_df, aes(y = pct_w_plan, x = years)) +
+        geom_point(size = 3, alpha = 0.5) +
+        geom_smooth(level = 0.9, alpha = 0, colour = "black") +
+        scale_y_continuous(limits = c(0,1)) +
+        ggtitle("Proportion of species with recovery plans", 
+                subtitle = "By listing year") +
+        labs(x = "",
+             y = "Count") +
+        theme_hc() + 
+        theme(text = element_text(family = "Open Sans"))
+# ggplotly(gg)
+gg
+```
+
 This pattern highlights the challenge of interpreting the time-to-plan figures because of the right censored data. The `r n_list_df$n_no_plan[length(n_list_df$n_no_plan)]` species without final or revised plans today effectively have a time-to-plan of infinity, so estimates of the mean / median will be biased low. Because of the stationarity problem, there's no reliable way to correct the bias.
 
 ### Time-to-plan over the years
@@ -149,13 +178,26 @@ Bearing in mind the issue of right-censored data, we can now ask, _How has the t
 ```{r thru_time, echo = FALSE, message = FALSE}
 tmp <- final_plans
 tmp$Year_Listed <- year(tmp$First_Listed)
-neg <- filter(tmp, Elapsed_Years <= 0)
-avg <- aggregate(Elapsed_Years ~ Year_Listed, tmp, stats::median, na.rm = TRUE)
-min <- aggregate(Elapsed_Years ~ Year_Listed, tmp, base::min, na.rm = TRUE)
-max <- aggregate(Elapsed_Years ~ Year_Listed, tmp, base::max, na.rm = TRUE)
-dat <- cbind(avg, min, max)
-dat <- dat[, c(1,2,4,6)]
-names(dat) <- c("Year", "Mean", "Min", "Max")
+tmp$Year_Plan <- year(tmp$Rec_Plan_Date)
+years <- seq(min(tmp$Year_Listed, na.rm = TRUE),
+             max(tmp$Year_Listed, na.rm = TRUE))
+
+cur_fx <- function(df, x, fn) {
+  sub_df <- filter(df, Year_Listed == x)
+  if(dim(sub_df)[1] == 0) return(NA)
+  switch(fn,
+         mean = mean(sub_df$Elapsed_Years, na.rm = TRUE),
+         min = min(sub_df$Elapsed_Years, na.rm = TRUE),
+         max = max(sub_df$Elapsed_Years, na.rm = TRUE)
+  )
+}
+
+n_plans <- unlist(lapply(years,  function(x) length(filter(tmp, Year_Plan == x)[[1]])))
+tm_mean <- unlist(lapply(years, cur_fx, df = tmp, fn = "mean"))
+tm_min <- unlist(lapply(years, cur_fx, df = tmp, fn = "min"))
+tm_max <- unlist(lapply(years, cur_fx, df = tmp, fn = "max"))
+dat <- data.frame(years, tm_mean, tm_min, tm_max, n_plans)
+names(dat) <- c("Year", "Mean", "Min", "Max", "N_plans")
 
 ggplot(dat, aes(y = Mean, x = Year)) +
   geom_line() +
@@ -163,13 +205,13 @@ ggplot(dat, aes(y = Mean, x = Year)) +
   geom_line(aes(y = Max, x = Year), colour = "gray70") +
   ggtitle("Time to recovery plan through the years", 
           subtitle = "Min and max in gray") +
-  labs(x = "Year",
-       y = "Time-to-recovery plan (years)\n") +
+  labs(x = "Year of Listing",
+       y = "Time-to-plan (years)\n") +
   theme_hc() + 
   theme(text = element_text(family = "Open Sans"))
 ```
 
-This clearly shows a steady decline in the time between listing and a final recovery plan. Recovery plans weren't required until the [1978 amendments to the ESA](https://www.gpo.gov/fdsys/pkg/STATUTE-92/pdf/STATUTE-92-Pg3751.pdf), and the requirements (site-specific actions, objective criteria, and cost estimates) weren't put in place until the [1988 amendments](http://uscode.house.gov/statutes/pl/100/478.pdf). Even with these caveats, why it took so long for so many originally listed species to get recovery plans is unclear.
+This shows a steady decline in the time between listing and a final recovery plan. Recovery plans weren't required until the [1978 amendments to the ESA](https://www.gpo.gov/fdsys/pkg/STATUTE-92/pdf/STATUTE-92-Pg3751.pdf), and the three requirements for recovery plans (site-specific actions, objective criteria, and cost estimates) weren't put in place until the [1988 amendments](http://uscode.house.gov/statutes/pl/100/478.pdf). These aspects of the ESA explain some of the long times to a plan for early species, but as we will 
 
 The downward trend after about 1997 is complicated by the negative time-to-recovery plans (i.e., part of multi-species plans). Without those negative values we have:
 
