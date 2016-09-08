@@ -1,0 +1,405 @@
+---
+title: "ESA recovery plans: time from listing to final recovery plans"
+author: "Jacob Malcom"
+date: "`r Sys.Date()`"
+runtime: shiny
+output: 
+  rmarkdown::html_document:
+    fig_caption: yes
+    toc: true
+    toc_depth: 3
+    toc_float: true
+---
+
+<script async defer src="https://hypothes.is/embed.js"></script>
+
+```{r setup, include = FALSE}
+library(ecosscraper)
+library(dplyr)
+library(ggplot2)
+library(ggthemes)
+library(knitr)
+library(lubridate)
+library(plotly)
+library(stringr)
+library(viridis)
+data("recovery_plan_table")
+data("species_info_table")
+data("ecos_all_spp")
+```
+
+## Abstract
+
+Recovery planning is an essential part of implementing the U.S. Endangered Species Act (ESA) because explicit planning helps conservation partners identify and address the key threats to listed species. Despite the importance of recovery planning, it is generally acknowledged that reaching draft recovery plans - much less final plans - takes far longer than the goal of 2-1/2 years from the time of listing. But the extent of planning (number of species with recovery plans) and time for planning has not been evaluated for nearly two decades. Using data from all domestic ESA-listed species, we quantify the extent of recovery planning shortfalls. We show that nearly 1/3 of listed species lack recovery plans, and on average it takes 5 years for a plan to be developed. ...
+
+## Introduction
+
+The U.S. Endangered Species Act (ESA) requires the Fish and Wildlife Service (FWS) and National Marine Fisheries Service (NMFS; collectively, the Services) to develop plans to guide the recovery of listed species, unless doing so is not warranted (e.g., for foreign listed species). Recovery plans have evoloved significantly over the years, as has recovery planning guidance the Services use. Since 1994, the Services' [guidance](http://www.nmfs.noaa.gov/pr/pdfs/fr/fr59-16024.pdf) has stated that recovery plans would be completed within 2-1/2 years. But we know a persistent problem is that recovery planning often takes far longer than that. While this problem is a "generally accepted" fact, there is very little quantitative information that can adequately describe the scope of the challenge.
+
+As part of ongoing work, we "scraped" the tables from all of FWS's [ECOS website](http://ecos.fws.gov). Using the data from the scraping, we sought to answer answer several outstanding questions about ESA recovery planning. How many species have final recovery plans, and how has that changed over the last 35 years? What is the average or median time from listing to a final recovery plan? What proportion of species have plans completed within the 2.5-year time-frame? How has the time required for a recovery plan changed over the past >40 years? Is there variation in time-to-recovery plan among FWS regions or between the Services? We show that both the extent of recovery plan coverage...
+
+```{r joins, echo = FALSE, warning = FALSE}
+combo <- dplyr::left_join(recovery_plan_table,
+                          species_info_table,
+                          by = "Species")
+names(combo)[1] <- "Rec_Plan_Date"
+combo$Rec_Plan_Date <- as_date(combo$Rec_Plan_Date)
+names(combo)[4] <- "Plan_Status"
+names(combo)[8] <- "Date_Cur_Status"
+combo$Date_Cur_Status <- as_date(combo$Date_Cur_Status)
+combo$Cur_Status_To_Plan <- as.numeric(combo$Rec_Plan_Date - combo$Date_Cur_Status)
+combo <- distinct(combo, Species, `Where Listed`, .keep_all = TRUE)
+
+# Next, the join with the 'big' ECOS species table to get original listing dates
+recplan_spp <- left_join(combo, ecos_all_spp, by = c("Species" = "Scientific_Name"))
+recplan_spp <- select(recplan_spp, Rec_Plan_Date, Title, Plan_Status, 
+                      Species, Status, Date_Cur_Status, Lead_Region, 
+                      Cur_Status_To_Plan, First_Listed, Species_Group,
+                      US_Foreign, Where_Listed)
+recplan_spp <- distinct(recplan_spp, Species, Where_Listed, .keep_all = TRUE)
+
+# Looks like I'm missing records for ~50 species compared to what the BoxScore
+# provides (http://ecos.fws.gov/ecp0/reports/box-score-report)...wait, no, the
+# footnote on that page says "active plans," so both draft and final.
+final_plans <- filter(recplan_spp, recplan_spp$Plan_Status == "Final")
+
+###############
+# Also need the complement of the previous, a data.frame of listed species,
+# with NAs for listed species lacking plans. Note that the 1593 I get here is 
+# the same as what BoxScore indicates today.
+listed <- filter(ecos_all_spp, 
+                 Federal_Listing_Status %in% c("Endangered", "Threatened"))
+listed <- filter(listed, US_Foreign %in% c("US", "US/Foreign"))
+
+listed <- left_join(listed, combo, by = c("Scientific_Name" = "Species"))
+listed <- distinct(listed, Scientific_Name, Where_Listed, .keep_all = TRUE)
+listed <- select(listed, -`Plan Action Status`, -Doc_Link, -Status, -`Lead Region`,
+                  -`Where Listed`)
+listed$Year_Listed <- year(listed$First_Listed)
+listed$Year_Plan <- year(listed$Rec_Plan_Date)
+
+```
+
+## Analyses
+
+The raw data scraped from ECOS cannot be used directly (Appendix A), so we undertook several data cleaning and management steps to prepare it for analysis (Appendix B). 
+
+### Species with and without plans
+
+The first question we need to address is, _How many listed species have plans, and how has that number changed through time?_ The answer to this question is important to interpreting time-to-plan statistics and figures because those analyses only include species with final recovery plans. This is "right censored" data, akin to the challenge of estimating the effects of a treatment on survival when individuals are still alive at the end of the experiment. While there are ways to estimate an "expected" values for right-censored data, those methods require making the questionable assumption that the same underlying process generates the data ([stationarity](https://en.wikipedia.org/wiki/Stationary_process)). We should suspect that variation in presidential administrations, congresses, and career staff at national, regional, and local levels have significant effects on the process that generates final recovery plans within some time-frame. Rather than make the almost certainly invalid assumption, we will instead look at how the number of species without plans has changed through time.
+
+```{r without_plans, echo = FALSE}
+# Make a data.frame of numbers listed, with and without plans, through time.
+years <- seq(min(listed$Year_Listed, na.rm = TRUE),
+             max(listed$Year_Listed, na.rm = TRUE))
+n_listed <- unlist(lapply(years, 
+                          FUN = function(x) sum(listed$Year_Listed <= x, 
+                                                na.rm = TRUE)))
+n_plans <- unlist(lapply(years, 
+                         FUN = function(x) sum(listed$Year_Plan <= x & 
+                                                 (listed$Plan_Status == "Final" |
+                                                  grepl(listed$Plan_Status, 
+                                                        pattern = "Revision")), 
+                                               na.rm = TRUE)))
+n_list_df <- data.frame(years, n_listed, n_plans)
+n_list_df$n_no_plan <- n_list_df$n_listed - n_list_df$n_plans
+
+no_plan <- filter(listed, is.na(listed$Year_Plan) | listed$Plan_Status != "Final")
+
+# And now the plot
+ggplot(n_list_df, aes(y = n_listed, x = years)) +
+  geom_line(colour = "gray70") +
+  geom_line(aes(y = n_no_plan, x = years),
+            size = 2) +
+  geom_line(aes(y = n_plans, x = years), 
+            colour = "gray70",
+            linetype = "dashed") +
+  ggtitle("Number of species without final recovery plans (black)", 
+          subtitle = "# listed species solid gray, # with plans dashed gray") +
+  labs(x = "",
+       y = "Count") +
+  theme_hc() + 
+  theme(text = element_text(family = "Open Sans"))
+```
+
+This pattern highlights the challenge of interpreting the time-to-plan figures because of the right censored data. The `r n_list_df$n_no_plan[length(n_list_df$n_no_plan)]` species without plans effectively have a time-to-plan of infinity. 
+
+### Percentiles
+
+One question that can be addressed with a dynamic plot is, _What percentage of recovery plans are completed in X years?_ For example, how often do the Services meet their goal of 2.5 years from listing to final recovery plan?
+
+```{r percentile, echo = FALSE, message = TRUE}
+duration <- sort(no_exp$Upd_Elapsed / 365, decreasing = FALSE)
+order <- seq(1:length(duration))
+percentile <- order / max(order)
+pctile <- data.frame(duration, order, percentile, stringsAsFactors = FALSE)
+
+gg <- ggplot(pctile, aes(y = duration, x = percentile)) +
+        geom_line() +
+        ggtitle("Time to recovery plan", 
+                subtitle = "As a function of quantiles") +
+        labs(x = "Percentile",
+             y = "Time-to-recovery plan (years)\n") +
+        theme_hc() + 
+        theme(text = element_text(family = "Open Sans"))
+
+ggplotly(gg) %>% layout(font = list(family = "Open Sans"))
+```
+
+With this we can quickly say that about 50% of plans are finalized within 4.7 years of the species' listing, 19% are completed within the 2.5 years the Services allot themselves, and 95% are finalized within 20 years.
+
+### Time-to-recovery plan over the years
+
+How has the time it takes to write and finalize a recovery plan changed over the years?
+
+```{r thru_time, echo = FALSE, message = FALSE}
+tmp <- no_exp
+tmp$list_yr <- year(tmp$Orig_List)
+avg <- aggregate(Upd_Elapsed / 365 ~ list_yr, tmp, mean, na.rm = TRUE)
+min <- aggregate(Upd_Elapsed / 365 ~ list_yr, tmp, min, na.rm = TRUE)
+max <- aggregate(Upd_Elapsed / 365 ~ list_yr, tmp, max, na.rm = TRUE)
+dat <- cbind(avg, min, max)
+dat <- dat[, c(1,2,4,6)]
+names(dat) <- c("Year", "Mean", "Min", "Max")
+
+ggplot(dat, aes(y = Mean, x = Year)) +
+  geom_line() +
+  geom_line(aes(y = Min, x = Year), colour = "gray70") +
+  geom_line(aes(y = Max, x = Year), colour = "gray70") +
+  ggtitle("Time to recovery plan through the years", 
+          subtitle = "Min and max in gray") +
+  labs(x = "Year",
+       y = "Time-to-recovery plan (years)\n") +
+  theme_hc() + 
+  theme(text = element_text(family = "Open Sans"))
+```
+
+This clearly shows a steady decline in the time between listing and a final recovery plan. Recovery plans weren't required until the [1978 amendments to the ESA](https://www.gpo.gov/fdsys/pkg/STATUTE-92/pdf/STATUTE-92-Pg3751.pdf), and the requirements (site-specific actions, objective criteria, and cost estimates) weren't put in place until the [1988 amendments](http://uscode.house.gov/statutes/pl/100/478.pdf). Even with these caveats, why it took so long for so many originally listed species to get recovery plans is unclear.
+
+The downward trend after about 1997 is complicated by the negative time-to-recovery plans (i.e., part of multi-species plans). Without those negative values we have:
+
+```{r noneg_thru_time, echo = FALSE, message = FALSE}
+tpos <- filter(tmp, tmp$Upd_Elapsed > 0)
+tpos$list_yr <- year(tpos$Orig_List)
+avg <- aggregate(Upd_Elapsed / 365 ~ list_yr, tpos, mean, na.rm = TRUE)
+min <- aggregate(Upd_Elapsed / 365 ~ list_yr, tpos, base::min, na.rm = TRUE)
+max <- aggregate(Upd_Elapsed / 365 ~ list_yr, tpos, base::max, na.rm = TRUE)
+dat <- cbind(avg, min, max)
+dat <- dat[, c(1,2,4,6)]
+names(dat) <- c("Year", "Mean", "Min", "Max")
+
+ggplot(dat, aes(y = Mean, x = Year)) +
+  geom_line() +
+  geom_line(aes(y = Min, x = Year), colour = "gray70") +
+  geom_line(aes(y = Max, x = Year), colour = "gray70") +
+  ggtitle("Time to recovery plan through the years", 
+          subtitle = "Min and max in gray") +
+  labs(x = "Year",
+       y = "Time-to-recovery plan (years)\n") +
+  theme_hc() + 
+  theme(text = element_text(family = "Open Sans"))
+```
+
+This shows a decline in average time-to-recovery plan, then a slight uptick starting around 1997. 
+
+### Number of plans through time
+
+Given the variation of time-to-recovery plans over the decades, it would be interesting to know when species got their plans and when plans - which may be mult-species - were written.
+
+```{r plans_per_year, echo = FALSE, message = FALSE}
+tmp$plan_yr <- year(tmp$Rec_Plan_Date)
+n_sp_yr <- as.data.frame(table(tmp$plan_yr))
+names(n_sp_yr) <- c("Year", "N_spp_planned")
+n_sp_yr$Year <- as.numeric(as.character(n_sp_yr$Year))
+n_pl_yr <- tapply(tmp$Title,
+                  INDEX = tmp$plan_yr,
+                  FUN = function(x) length(unique(x)))
+n_pl_yr <- data.frame(Year = as.numeric(names(n_pl_yr)), 
+                      N_plans = as.vector(n_pl_yr))
+dat <- left_join(n_sp_yr, n_pl_yr, by = "Year")
+
+ggplot(dat, aes(y = N_spp_planned, x = Year)) +
+  geom_line() +
+  geom_line(aes(y = N_plans, x = Year), colour = "gray70") +
+  ggtitle("Number of plans and species covered by year", 
+          subtitle = "# spp. in black, # plans in gray") +
+  labs(x = "Year",
+       y = "Count") +
+  theme_hc() + 
+  theme(text = element_text(family = "Open Sans"))
+```
+
+To me, the most interesting result from this figure is that it shows what is possible when there is a will to get things done. In the mid- to late-1990s a lot of species got recovery plans. The ratio of number of species to number of plans illustrates the big jump in multi-species recovery plans, which has both costs and benefits. We also know that many plans from this time are insufficient by current standards. Despite these caveats, I think this shows that a lot can be accomplished in relatively short periods of time.
+
+### By region and agency
+
+How does the variation in time-to-recovery plan break down by region and agency?
+
+```{r by_region, echo = FALSE, warning = FALSE}
+tmp$Region <- stringr::str_match(tmp$`Lead Region`, 
+                                     pattern = "\\([A-Za-z0-9 ]+\\)")
+tmp$Region <- stringr::str_replace(tmp$Region,
+                                   "National Marine Fisheries Service",
+                                   "NMFS")
+tmp$Region <- stringr::str_replace(tmp$Region, "\\(", "")
+tmp$Region <- stringr::str_replace(tmp$Region, "\\)", "")
+
+ggplot(tmp, aes(y = tmp$Date_Delta / 365, x = tmp$Region)) +
+  geom_violin(fill = "gray", alpha = 0.5, colour = NA) +
+  geom_boxplot(colour = "gray20", fill = NA) +
+  labs(x = "", y = "Time-to-Recovery Plan (years)") +
+  ggtitle("Time to recovery plan by region", 
+          subtitle = "From ECOS tables") +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+  theme_hc()
+```
+
+Time for NMFS is both high (median) and highly variable relative to FWS regions. Regions 4 and 8, which encompass many species, are not as far behind on recovery planning as I would have thought (though I don't know if they have significantly more species without plans). Last but not least, a quick summary.
+
+```{r region_dist, echo = FALSE}
+t2 <- as.data.frame(table(tmp$Region))
+names(t2) <- c("Region/Agency", "# Plans")
+kable(t2, caption = "Distribution of plans (with positive time-to-plan) among FWS regions and agencies", align = "c")
+```
+
+## Discussion
+
+TODO:
+
+- Write an actual Discussion...and some better notes on the Results;
+
+- Join the table of domestic listed species with the recovery plan table to evaluate how many species lack plans, where (region) those species are, and how long they have been without plans;
+
+- If I weren't obsessed with getting the search engine built out, this data could make for an interesting map, showing species with plan by region...
+
+- ???
+
+## Appendix A. Initial examination
+
+Before doing anything, we examined the distribution of the time from listing date to recovery plan date, i.e., the _completely unfilterered_ data.
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+qplot(combo$Date_Delta / 365, geom = "histogram") +
+      labs(x = "Years between date listed and recovery plan date") +
+      ggtitle("Time to recovery plan", 
+              subtitle = "Original, uncleaned data") +
+      theme_hc() +
+      theme(plot.title=element_text(hjust = 0, size = 18))
+```
+
+There's clearly something off about this data. A significant number of records have a time of zero or fewer days between listing and the recover plan date. Looking even at the top few rows of data, it's pretty clear that the reason is the most-recent listing decision date is presented at the top of ECOS. To get the original listing dates, we can mine the Federal Register notices data (also scraped from ECOS). What about species with very long times? Looking at those data, it appears that most, but not all, are high in part because they are revisions. 
+
+## Appendix B. Data cleaning
+
+The top table for each species on ECOS includes a "Date Listed," but that date is _only the most recent date of a listing status change_. For example, if a species is up- or down-listed, or if an Experimental population is listed, then that most-recent date is used. But we're interested in the original listing date because it is from that time when the Services should start recovery planning. 
+
+We can use the Federal Register table scraped from ECOS to try to get the original listing date for each species; we just have to find which FR notice corresponds to the listing. Unfortunately, there are >21K FR entries to sort through, and there is no single FR heading that indicates the final rule. But with some pattern matching and excluding, we can get a pretty good estimate. Here is the code used to clean the data:
+
+```{r est_orig_list}
+data("federal_register_table")
+t1 <- filter(federal_register_table, 
+             grepl(federal_register_table$Title, 
+                   pattern = "Determination|Determined|Listing|Listed as|Status|Endangered Species List|to be End|to be Thr|Appendix D|Final Rule for|Part 17|List[s]+ of Endangered|Amendments to List of Endangered Fish and Wildlife|Final Rule to List|Technical Corrections for Eight Wild|Emergency Rule to List|Addition.*List of End",
+                   ignore.case = TRUE))
+t2 <- filter(t1, 
+             !grepl(t1$Title, 
+                    pattern = "Notice of Review|Supplement to Review|Review of|Review for|Findings on|Proposed|Proposal|Status Rev",
+                    ignore.case = TRUE))
+# head(t2$Title, 10)
+# dim(t2)
+# spp_cov <- unique(t2$Species)
+# setdiff(unique(recovery_plan_table$Species), spp_cov)
+
+t2$Date <- as.Date(t2$Date)
+earliest <- aggregate(Date ~ Species, t2, min, na.rm = TRUE) 
+kable(head(earliest, 5), align = c("l", "c"))
+```
+
+```{r upd_list_date}
+updated <- left_join(combo, earliest, by = "Species")
+updated$List_Diff <- as.numeric(updated$Date_Listed - updated$Date)
+diff <- filter(updated, updated$List_Diff > 45)
+
+## Have to use a loop because, for reasons passing understanding, no use of
+## lapply returns a vector of type Date.
+orig_ls <- as.Date(rep("2000-01-01", length(updated$Title)))
+for(i in 1:length(orig_ls)) {
+  if(!is.na(updated$List_Diff[i]) & updated$List_Diff[i] > 45) {
+    orig_ls[i] <- updated$Date[i]
+  } else {
+    orig_ls[i] <- updated$Date_Listed[i]
+  }
+}
+updated$Orig_List <- orig_ls
+updated$Upd_Elapsed <- as.numeric(updated$Rec_Plan_Date - updated$Orig_List)
+updated$Orig_Elapsed <- as.numeric(updated$Rec_Plan_Date - updated$Date_Listed)
+```
+
+With the initial cleaning, and looking only at the records with a `Final` recovery plan, we have a new distribution:
+
+```{r upd_dist, echo = FALSE, message = FALSE}
+final <- filter(updated, updated$`Plan Status` == "Final")
+neg <- filter(final, final$Upd_Elapsed <= 0)
+
+qplot(final$Upd_Elapsed / 365, geom = "histogram") +
+      labs(x = "Years between date listed and recovery plan date") +
+      ggtitle("Time to recovery plan", 
+              subtitle = "with original listing dates") +
+      theme_hc() +
+      theme(plot.title=element_text(hjust = 0, size = 18))
+```
+
+Clearly the negative values are errors...except they're not all errors. Some species were listed _after_ the recovery plan they are a part of was written. Based on an initial examination, these valid negative years species tend to be part of multi-species plans, e.g., [Ohlone tiger beetle](https://ecos.fws.gov/ecp0/profile/speciesProfile?spcode=I0OW). But some are errors, e.g., Ring Pink (Mussel), which has a 1991 recovery plan and an experimental population listed in 2007. Further inspection shows that these errors are for experimental populations, which should also be excluded. First, a table of the species with negative time-to-recovery plans:
+
+```{r show_neg, echo = FALSE}
+no_exp <- filter(final, !grepl(final$Status, pattern = "Experimental"))
+no_exp <- select(no_exp, -Doc_Link, -`Plan Action Status`)
+no_exp <- distinct(no_exp)
+neg <- filter(no_exp, no_exp$Upd_Elapsed <= 0)
+to_show <- select(neg, Species, Rec_Plan_Date, Orig_List, Upd_Elapsed)
+kable(to_show, align = c("l", "c", "c", "r"))
+```
+
+And then the distribution of times-to-recovery plans, using the original listing dates, and filtering out species without final plans and experimental population listings:
+
+```{r no_exp, echo = FALSE, message = FALSE}
+qplot(no_exp$Upd_Elapsed / 365, geom = "histogram") +
+      labs(x = "Years between date listed and recovery plan date") +
+      ggtitle("Time to recovery plan", 
+              subtitle = "no experimental populations") +
+      theme_hc() +
+      theme(plot.title=element_text(hjust = 0, size = 18))
+```
+
+This is the valid final data set (n = `r dim(no_exp)[1]`), and all of the negative values (n = `r dim(neg)[1]`) appear to be correct. A summary of the data:
+
+```{r save_dat, echo = FALSE}
+# filtered_recplan_df <- no_exp
+# save(filtered_recplan_df, file = "data/filtered_recplan_df.rda")
+```
+
+```{r fin_summary, echo = FALSE}
+delta_tmp <- c(n = length(no_exp$Date_Delta),
+               min = min(no_exp$Date_Delta, na.rm = TRUE),
+               median = median(no_exp$Date_Delta, na.rm = TRUE),
+               mean = mean(no_exp$Date_Delta, na.rm = TRUE),
+               max = max(no_exp$Date_Delta, na.rm = TRUE))
+listd_tmp <- c(n = as.character(length(no_exp$Orig_List)),
+               min = as.character(min(no_exp$Orig_List, na.rm = TRUE)),
+               median = as.character(median(no_exp$Orig_List, na.rm = TRUE)),
+               mean = as.character(mean(no_exp$Orig_List, na.rm = TRUE)),
+               max = as.character(max(no_exp$Orig_List, na.rm = TRUE)))
+pland_tmp <- c(n = as.character(length(no_exp$Rec_Plan_Date)),
+               min = as.character(min(no_exp$Rec_Plan_Date, na.rm = TRUE)),
+               median = as.character(median(no_exp$Rec_Plan_Date, na.rm = TRUE)),
+               mean = as.character(mean(no_exp$Rec_Plan_Date, na.rm = TRUE)),
+               max = as.character(max(no_exp$Rec_Plan_Date, na.rm = TRUE)))
+to_show_df <- data.frame(`Date Listed` = as.vector(listd_tmp),
+                         `Plan Date` = as.vector(pland_tmp),
+                         `Time-to-plan` = as.vector(delta_tmp))
+row.names(to_show_df) <- c("N", "min", "median", "mean", "max")
+kable(to_show_df,
+      caption = "Summary statistics of time between listing and final recovery plan. Min, median, mean, and max are given in days.",
+      digits = 1,
+      align = "c")
+```

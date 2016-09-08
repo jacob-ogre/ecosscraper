@@ -18,5 +18,7 @@ Imports:
     digest,
     dplyr,
     httr,
+    plotly,
     rvest,
-    stringr
+    stringr,
+    viridis
