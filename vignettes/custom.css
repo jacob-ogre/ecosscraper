@@ -1,0 +1,48 @@
+.header-panel {
+  background-color: #2d2d86;
+    height: 144px;
+  position: relative;
+  z-index: 2;
+}
+
+.header-panel div {
+    position: static;
+    height: 100%;
+}
+
+.header-panel h1 {
+    color: #FFF;
+    /*font-size: 20px;*/
+    /*font-weight: 400;*/
+    position: absolute;
+    bottom: 10px;
+    padding-left: 35px;
+}
+
+.pages > div {
+    padding: 0 5px;
+    padding-top: 64px;
+    margin: 0;
+}
+
+img.image-thumb {
+    width: 400px;
+}
+
+a {
+  color: #2d2d86;
+  font-weight: 600;
+}
+
+.note {
+  font-size: small;
+}
+
+.return {
+  font-weight: bold;
+}
+
+.mytitle {
+  font-size: 22pt;
+  font-weight: 600;
+}
