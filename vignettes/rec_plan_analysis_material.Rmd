@@ -105,22 +105,26 @@ no_plan <- filter(listed, is.na(listed$Year_Plan))
 
 # Abstract
 
-Recovery planning is an essential part of implementing the U.S. Endangered Species Act (ESA) because explicit planning helps identify and address the key threats to listed species. Despite the importance of recovery planning, it is generally acknowledged that reaching a "final" plan takes far longer than the goal of 2-1/2 years from the time of listing. But the extent of planning (number of species with recovery plans) and time required for planning has not been evaluated for over a decade. Using data from all domestic ESA-listed species, we quantify basic characteristics of ESA recovery planning. I show that 1/4 of listed species lack recovery plans; the average recovery plan has taken >5 years to be developed after listing; and the recovery plans that have been written are nearly 20 years old on average. These results are not unexpected for agencies that have seen dwindling budgets and more species to protect, but they highlight the need to improve recovery planning so that ESA-listed species can benefit. Defenders proposes that these challenges can be addressed, in part, by moving to [web-based, dynamic recovery plans](https://defend-esc-dev.org/shiny/open/dynamic-recovery/) that can improve efficiency in plan development and improve effectiveness by providing timely information.
+Recovery planning is an essential part of implementing the U.S. Endangered Species Act (ESA) because explicit planning helps identify and address the key threats to listed species. Despite the importance of recovery planning, it is generally acknowledged that reaching a "final" plan takes far longer than the goal of 2-1/2 years from the time of listing. But the extent of planning (number of species with recovery plans) and time required for planning has not been evaluated for over a decade. Using data from all domestic ESA-listed species, we quantify basic characteristics of ESA recovery planning. We show that 1/4 of listed species lack recovery plans; the average recovery plan has taken >5 years to be developed after listing; and the recovery plans that have been written are nearly 20 years old on average. These results are not unexpected for agencies that have seen dwindling budgets and more species to protect, but they highlight the need to improve recovery planning so that ESA-listed species can benefit. Defenders proposes that these challenges can be addressed, in part, by moving to [web-based, dynamic recovery plans](https://defend-esc-dev.org/shiny/open/dynamic-recovery/) that can improve efficiency in plan development and improve effectiveness by providing timely information.
 
 # Introduction
 
 The U.S. Endangered Species Act (ESA) requires the Fish and Wildlife Service (FWS) and National Marine Fisheries Service (NMFS; collectively, the Services) to develop plans to guide the recovery of listed species, unless doing so is not warranted (e.g., for foreign listed species). Recovery plans have evoloved significantly over the years, as has recovery planning guidance the Services use. The Services' [1994 recovery planning guidance](http://www.nmfs.noaa.gov/pr/pdfs/fr/fr59-16024.pdf) stated that "the Services will...develop recovery plans within 2-1/2 years after final listing." But we know a persistent problem is that recovery planning often takes far longer than that. While this problem is a "generally accepted" fact, there is very little quantitative information that can adequately describe the scope of the challenge.
 
-Using the data scraped from FWS's [ECOS website](http://ecos.fws.gov)<sup id="I1">[1](#footI1)</sup>, we sought to answer answer several outstanding questions about ESA recovery planning. How many species have final recovery plans, and how has that changed over the last 35 years?<sup id="I2">[2](#footI2)</sup> What is the average or median time from listing to a final recovery plan? What proportion of species have plans completed within the 2.5-year time-frame? How has the time required for a recovery plan changed over the past >40 years? How old are recovery plans as of 2016? Is there variation in time-to-recovery plan among FWS regions or between the Services? We show that both the extent of recovery plan coverage and the time required for recovery plan development, finalization, and revision are falling short of expectations. This analysis should provide a solid reason for the Services, and FWS in particular, to critically evaluate how recovery planning is done. (NMFS recently undertook a [public review of their recovery program](http://www.nmfs.noaa.gov/pr/recovery/#2016%20National%20Recovery%20Program%20Review) and is implementing changes.)
+Using the data scraped from FWS's [ECOS website](http://ecos.fws.gov)<sup id="I1">[1](#footI1)</sup>, we sought to answer answer several outstanding questions about ESA recovery planning. How many species have final recovery plans, and how has that changed over the last 35 years?<sup id="I2">[2](#footI2)</sup> What is the average or median time from listing to an original final recovery plan?<sup id="I2">[3](#footI3)</sup> What proportion of species have plans completed within the 2.5-year time-frame? How has the time required for a recovery plan changed over the past >40 years? How old are recovery plans as of 2016?<sup id="I2">[4](#footI4)</sup> Is there variation in time-to-recovery plan among FWS regions or between the Services? We show that both the extent of recovery plan coverage and the time required for recovery plan development, finalization, and revision are falling short of expectations. This analysis should provide a solid reason for the Services, and FWS in particular, to critically evaluate how recovery planning is done. (NMFS recently undertook a [public review of their recovery program](http://www.nmfs.noaa.gov/pr/recovery/#2016%20National%20Recovery%20Program%20Review) and is implementing changes.)
 
 
 <a name="footI1">1</a>: The raw data scraped from ECOS cannot be used directly, so we undertook several data cleaning and management steps to prepare it for analysis (Appendix A). In addition to the Appendix, the raw Rmarkdown file that generated this working paper can be reviewed for the entire analysis.
 
 <a name="footI2">2</a>: We focus on domestic and transboundary species because foreign listed species will rarely if ever have recovery plans.
 
+<a name="footI3">3</a>: We only include species with recovery plans that are the _original_ final plan in the current analysis of time-to-plan: including species with revisions (which may come many years later) in these calculations would artificially inflate the time-to-plan. Unfortunately, ECOS rarely includes the original plan or the date of the original final plan, so we can't yet estimate the time-to-plan for species that have revisions. 
+
+<a name="footI4">4</a>: In contrast to the time-to-plan estimates, we _do include_ all species with either original or revised plans for estimating plan age as of 2016 because the most-recent time is known and the age estimate is unbiased.
+
 # Species with and without plans
 
-The first question we need to address is, _How many domestic listed species have plans, and how has that number changed through time?_ The answer to this question is important to interpreting time-to-plan statistics and figures because those analyses only include species with final recovery plans.<sup id="f1">[3](#foot1)</sup> 
+The first question we need to address is, _How many domestic listed species have plans, and how has that number changed through time?_ The answer to this question is important to interpreting time-to-plan statistics and figures because those analyses only include species with final recovery plans.<sup id="f1">[5](#foot1)</sup> 
 
 ```{r without_plans, echo = FALSE, fig.cap="Click figure to enlarge"}
 # Make a data.frame of numbers listed, with and without plans, through time.
@@ -213,11 +217,11 @@ In the mid- to late-1990s a lot of species got recovery plans, in large part bec
 
 <hr>
 
-<a name="foot1">3</a>: This is "right censored" data, akin to the challenge of estimating the effects of a treatment on survival when individuals are still alive at the end of the experiment. While there are ways to estimate an "expected" values for right-censored data, those methods require making the questionable assumption that the same underlying process generates the data ([stationarity](https://en.wikipedia.org/wiki/Stationary_process)). We should suspect that variation in presidential administrations, congresses, and career staff at national, regional, and local levels have significant effects on the process that generates final recovery plans within some time-frame. Rather than make the almost certainly invalid assumption, we will instead look at how the number of species without plans has changed through time. <div class="return">[Return to text](#f1)</div>
+<a name="foot1">5</a>: This is "right censored" data, akin to the challenge of estimating the effects of a treatment on survival when individuals are still alive at the end of the experiment. While there are ways to estimate an "expected" values for right-censored data, those methods require making the questionable assumption that the same underlying process generates the data ([stationarity](https://en.wikipedia.org/wiki/Stationary_process)). We should suspect that variation in presidential administrations, congresses, and career staff at national, regional, and local levels have significant effects on the process that generates final recovery plans within some time-frame. Rather than make the almost certainly invalid assumption, we will instead look at how the number of species without plans has changed through time. <div class="return">[Return to text](#f1)</div>
 
 # Time-to-plan
 
-As noted in the __Introduction__, the time to develop and finalize recovery plans is known to be "too long." _What does the data say about how long recovery planning takes?_
+As noted in the __Introduction__, the time to develop and finalize recovery plans is known to be "too long." _What does the data say about how long recovery planning takes?_ (As discussed in footnote 3 of the Introduction, these analyses use only species that have a final plan, but not those with a revised plan.)
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE, fig.cap="Click figure to enlarge"}
 qplot(final_plans$Elapsed_Years, geom = "histogram") +
@@ -321,7 +325,7 @@ This shows a steady decline in the time between listing and a final recovery pla
 
 # Plan ages
 
-Another challenge of recovery planning is the difficulty of updating plans: revisions require extensive work by planning teams and _Federal Register_ notices and potential revisions to a revision draft. But what we (collectively) know about a species changes rapidly, from basic biological research, to the types of management that can help or hinder recovery, and many topics in-between. This begs the question, _What is the distribution of recovery plan ages?_
+Another challenge of recovery planning is the difficulty of updating plans: revisions require extensive work by planning teams and _Federal Register_ notices and potential revisions to a revision draft. But what we (collectively) know about a species changes rapidly, from basic biological research, to the types of management that can help or hinder recovery, and many topics in-between. This begs the question, _What is the distribution of recovery plan ages?_ (As described in footnote 4 of the Introduction, these analyses include all species with final plans, whether original or revised.)
 
 ```{r plan_age, echo = FALSE, warning = FALSE, message = FALSE, fig.cap="Click figure to enlarge"}
 with_plan$Current_Age <- as.numeric(Sys.Date() - with_plan$Rec_Plan_Date) / 365
@@ -335,7 +339,7 @@ qplot(with_plan$Current_Age, geom = "histogram") +
       theme(plot.title=element_text(hjust = 0, size = 18))
 ```
 
-With a median age of `r median(with_plan$Current_Age, na.rm = TRUE)`, most recovery plans are quite old - if they were people, they could vote. The distribution reflects the pattern of plans-through-time even without considering the 135 plans that have been or are being revised. As with the time-to-plan, we can use a dynamic percentile plot to quickly find out the proportion of species' plans that are less than X years old:
+With a median age of `r round(median(with_plan$Current_Age, na.rm = TRUE), 2)` years, most recovery plans are quite old - if plans were people, they could vote. The distribution reflects the pattern of plans-through-time even without considering the 135 plans that have been or are being revised. As with the time-to-plan, we can use a dynamic percentile plot to quickly find out the proportion of species' plans that are less than X years old:
 
 ```{r spp_pctile, echo = FALSE, warning = FALSE, message = FALSE, fig.cap="Click figure to enlarge"}
 age <- sort(with_plan$Current_Age, decreasing = FALSE)
@@ -407,7 +411,7 @@ ggplot(final_plans, aes(y = Elapsed_Years, x = Lead_Region)) +
   theme_hc()
 ```
 
-Time for NMFS is both high (median) and highly variable relative to FWS regions. Regions 4 and 8, which encompass many species, do not take as long recovery planning as I would have thought (though I don't know if they have significantly more species without plans). Last but not least, a quick summary.
+Time for NMFS is both high (median) and highly variable relative to FWS regions. Regions 4 and 8, which encompass many species, do not take as long recovery planning as I would have thought.  
 
 # Discussion
 
