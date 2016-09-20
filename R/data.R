@@ -105,7 +105,9 @@
 #' the summary tables for all section 10 agreements. The types of agreements
 #' in the data include: Habitat Conservation Plans (HCPs); Safe Harbor
 #' Agreements (SHAs); Candidate Conservation Agreements (CCAs); and Candidate
-#' Conservation Agreements with Assurances (CCAAs).
+#' Conservation Agreements with Assurances (CCAAs). Some variables in the "parent"
+#' data sources, e.g., \link{HCP_SHA}, are missing from this data.frame because
+#' they are unique to that agreement type.
 #'
 #' @format A data frame with 1434 rows and 25 variables
 #' \describe{
