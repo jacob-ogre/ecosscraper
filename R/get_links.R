@@ -1,5 +1,6 @@
-#' Get a table of T, E, C, and P data.
+#' Get a table of species-in-ECOS data
 #'
+#' Returns threatened, endangered, candidate, and proposed species from ECOS.
 #' Use the URL set in options()$TE_list to get a data.frame that includes links
 #' for fetching data for any species with pages on TESS.
 #'
@@ -23,6 +24,9 @@
 #' all_spp <- get_TECP_table()
 #' head(all_spp)
 get_TECP_table <- function() {
+  if(is.null(options()$TE_list)) {
+    
+  }
   page <- xml2::read_html(options()$TE_list)
   tabl <- rvest::html_nodes(page, "table")
   all_spp <- as.data.frame(rvest::html_table(tabl))
