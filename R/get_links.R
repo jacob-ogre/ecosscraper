@@ -142,7 +142,7 @@ get_species_links <- function(df, species, pause = TRUE, verbose = TRUE) {
 #' @examples
 #' # one or more lines to demo the function
 get_species_page <- function(url) {
-  page <- try(read_html(url))
+  page <- try(read_html(URLencode(url)))
   if(class(page)[1] != "try-error") {
     if(is_species_profile(page)) {
       return(page)
@@ -287,7 +287,7 @@ get_agreement_links <- function() {
   for(i in regions) {
     for(j in types) {
       pg <- paste0(base, i, suff, j)
-      page <- try(xml2::read_html(pg))
+      page <- try(xml2::read_html(URLencode(pg)))
       if(class(page[1]) == "list") {
         form <- try(rvest::html_nodes(page, "select option"))
         pgln <- try(rvest::html_attr(form, "value"))

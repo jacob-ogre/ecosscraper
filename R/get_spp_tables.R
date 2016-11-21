@@ -102,7 +102,7 @@ get_tables <- function(sp) {
   cur_date <- Sys.Date()
   species <- unique(dplyr::filter(TECP_domestic, 
                            Species_Page == sp)$Scientific_Name)
-  cur_page <- xml2::read_html(sp)
+  cur_page <- xml2::read_html(URLencode(sp))
   page_txt <- rvest::html_text(cur_page)
   md5_hash <- digest::digest(page_txt)
   tab_1 <- data.frame(Species = species,
