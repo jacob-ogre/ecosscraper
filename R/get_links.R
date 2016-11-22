@@ -19,24 +19,29 @@
 #' }
 #' @importFrom rvest html_nodes html_table
 #' @importFrom xml2 read_html
+#' @importFrom httr http_error
 #' @export
 #' @examples
 #' all_spp <- get_TECP_table()
 #' head(all_spp)
 get_TECP_table <- function() {
-  if(is.null(options()$TE_list)) {
-    
+  # if(is.null(options()$TE_list)) {
+  #   
+  # }
+  if(!httr::http_error(options()$TE_list)) {
+    page <- xml2::read_html(options()$TE_list)
+    tabl <- rvest::html_nodes(page, "table")
+    all_spp <- as.data.frame(rvest::html_table(tabl))
+    names(all_spp) <- gsub(x = names(all_spp), 
+                           pattern = ".", 
+                           replacement = "_",
+                           fixed = TRUE)
+    all_spp$Species_Page <- paste0(options()$ECOS_sp_prefix,
+                                   all_spp$Species_Code)
+    return(all_spp)
+  } else {
+    stop("Cannot get the website to scrape the TECP table.")
   }
-  page <- xml2::read_html(options()$TE_list)
-  tabl <- rvest::html_nodes(page, "table")
-  all_spp <- as.data.frame(rvest::html_table(tabl))
-  names(all_spp) <- gsub(x = names(all_spp), 
-                         pattern = ".", 
-                         replacement = "_",
-                         fixed = TRUE)
-  all_spp$Species_Page <- paste0(options()$ECOS_sp_prefix,
-                                 all_spp$Species_Code)
-  return(all_spp)
 }
 
 #' Gather all links for all or a subset of ECOS species.
@@ -98,7 +103,7 @@ bulk_species_links <- function(data, ..., parallel = TRUE) {
 get_species_links <- function(df, species, pause = TRUE, verbose = TRUE) {
   # Want to warn, but also return an informative df
   err_res <- function(e, species) {
-    print(paste("Warning:", e, species))
+    warning(paste("Warning:", e, species))
     err_res <- data.frame(Scientific_Name = species,
                         href = "No page",
                         link = "No page",
@@ -142,15 +147,18 @@ get_species_links <- function(df, species, pause = TRUE, verbose = TRUE) {
 #' @examples
 #' # one or more lines to demo the function
 get_species_page <- function(url) {
-  page <- try(read_html(URLencode(url)))
-  if(class(page)[1] != "try-error") {
-    if(is_species_profile(page)) {
-      return(page)
+  url <- URLencode(url)
+  if(!httr::http_error(url)) {
+    page <- try(read_html(url))
+    if(class(page)[1] != "try-error") {
+      if(is_species_profile(page)) {
+        return(page)
+      } else {
+        stop(paste(url, "not a link to a species profile"))
+      }
     } else {
-      stop(paste(url, "not a link to a species profile"))
+      stop(paste("Error reading", url))
     }
-  } else {
-    stop(paste("Error reading", url))
   }
 }
 

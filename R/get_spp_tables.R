@@ -102,29 +102,35 @@ get_tables <- function(sp) {
   cur_date <- Sys.Date()
   species <- unique(dplyr::filter(TECP_domestic, 
                            Species_Page == sp)$Scientific_Name)
-  cur_page <- xml2::read_html(URLencode(sp))
-  page_txt <- rvest::html_text(cur_page)
-  md5_hash <- digest::digest(page_txt)
-  tab_1 <- data.frame(Species = species,
-                      Page = sp, 
-                      Date = cur_date, 
-                      Page_txt_md5 = md5_hash,
-                      stringsAsFactors = FALSE)
-  
-  a_nodes <- rvest::html_nodes(cur_page, "a")
-  pg_links <- rvest::html_attr(a_nodes, "href")
-  link_txt <- rvest::html_text(a_nodes)
-  link_tbl <- data.frame(Doc_Link = pg_links, 
-                         Title = link_txt,
-                         stringsAsFactors = FALSE)
-  
-  p_tables <- rvest::html_nodes(cur_page, "table")
-  tab_res <- lapply(p_tables, get_table)
-  tab_upd <- lapply(tab_res, join_for_links, links = link_tbl, sp = species)
-  tab_names <- lapply(tab_upd, function(x) suppressWarnings(get_table_type(x)))
-  names(tab_upd) <- unlist(tab_names)
-  tab_upd[["scrape_info"]] <- tab_1
-  return(tab_upd)
+  url <- URLencode(sp)
+  if(!httr::http_error(url)) {
+    cur_page <- xml2::read_html(url)
+    page_txt <- rvest::html_text(cur_page)
+    md5_hash <- digest::digest(page_txt)
+    tab_1 <- data.frame(Species = species,
+                        Page = url, 
+                        Date = cur_date, 
+                        Page_txt_md5 = md5_hash,
+                        stringsAsFactors = FALSE)
+    
+    a_nodes <- rvest::html_nodes(cur_page, "a")
+    pg_links <- rvest::html_attr(a_nodes, "href")
+    link_txt <- rvest::html_text(a_nodes)
+    link_tbl <- data.frame(Doc_Link = pg_links, 
+                           Title = link_txt,
+                           stringsAsFactors = FALSE)
+    
+    p_tables <- rvest::html_nodes(cur_page, "table")
+    tab_res <- lapply(p_tables, get_table)
+    tab_upd <- lapply(tab_res, join_for_links, links = link_tbl, sp = species)
+    tab_names <- lapply(tab_upd, function(x) suppressWarnings(get_table_type(x)))
+    names(tab_upd) <- unlist(tab_names)
+    tab_upd[["scrape_info"]] <- tab_1
+    return(tab_upd)
+  } else {
+    warning(paste("http_error", url))
+    return(NULL)
+  }
 }
 
 #' Extract named tables from a list of tables extracted for species

@@ -45,13 +45,9 @@ make_pdf_dest <- function(link, subd = "") {
                  data[length(data)],
                  paste0(data[length(data)], ".pdf"))
   dest <- options()$base_dir
-  if(subd != "") {
-    dest <- paste(dest, subd, sep = "/")
-  }
-  if(!dir.exists(dest)) {
-    dir.create(dest, recursive = TRUE)
-  }
-  dest <- paste(dest, outf, sep = "/")
+  if(subd != "") dest <- file.path(dest, subd)
+  if(!dir.exists(dest)) dir.create(dest, recursive = TRUE)
+  dest <- file.path(dest, outf)
   return(dest)
 }
 
