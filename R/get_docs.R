@@ -19,7 +19,7 @@ get_document <- function(url, subd, pause = TRUE) {
       if(class(res) == "try-error") { # Try once more 
         res <- try(httr::GET(url, httr::write_disk(dest, overwrite = TRUE)))
         if(class(res) == "try-error") {
-          return(data.frame(url = url
+          return(data.frame(url = url,
                             dest = dest, 
                             success = "Failed", 
                             pdfCheck = NA,
