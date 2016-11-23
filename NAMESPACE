@@ -2,6 +2,7 @@
 
 export(bind_tables)
 export(bulk_species_links)
+export(file_check)
 export(get_5yrev_links)
 export(get_TECP_table)
 export(get_agreement_links)
