@@ -14,7 +14,7 @@ get_document <- function(url, subd, pause = TRUE) {
   url <- URLencode(url)
   if(!file_check(dest)) {
     if(pause == TRUE) Sys.sleep(runif(1, 0.5, 3))
-    if(!httr::http_error(url)) {
+    if(class(try(httr::http_error(url), silent = TRUE)) != "try-error") {
       res <- try(httr::GET(url, httr::write_disk(dest, overwrite = TRUE)))
       if(class(res) == "try-error") { # Try once more 
         res <- try(httr::GET(url, httr::write_disk(dest, overwrite = TRUE)))
