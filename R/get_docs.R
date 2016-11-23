@@ -9,14 +9,17 @@
 #' @export
 #' @examples
 #' # one or more lines to demo the function
-get_document <- function(link, subd, pause = TRUE) {
-  dest <- make_pdf_dest(link, subd)
-  if(!file.exists(dest)) {
+get_document <- function(url, subd, pause = TRUE) {
+  dest <- make_pdf_dest(url, subd)
+  if(!file.exists(dest) | !is_pdf(dest)) {
     if(pause == TRUE) Sys.sleep(runif(1, 0.5, 3))
-    res <- try(httr::GET(URLencode(link), httr::write_disk(dest)))
+    if(httr::http_error(url))
+    res <- try(httr::GET(URLencode(url), 
+                         httr::write_disk(dest, overwrite = TRUE)))
     if(class(res) == "try-error") {
       # Try once more because the error may be a temp connection issue
-      res <- try(httr::GET(URLencode(link), httr::write_disk(dest)))
+      res <- try(httr::GET(URLencode(url), 
+                           httr::write_disk(dest, overwrite = TRUE)))
       if(class(res) == "try-error") {
         print(paste("GET Error:", res))
         return(data.frame(dest = dest, 
@@ -39,17 +42,25 @@ get_document <- function(link, subd, pause = TRUE) {
 #' @param link A URL from ECOS to download a PDF document
 #' @param subd The subdirectory in which the download will be written
 #' @return The file path where the download will be written
+#' @export
 make_pdf_dest <- function(link, subd = "") {
-  data <- unlist(stringr::str_split(link, "/"))
-  outf <- ifelse(grepl(data[length(data)], pattern = "pdf$"),
-                 data[length(data)],
-                 paste0(data[length(data)], ".pdf"))
-  dest <- options()$base_dir
-  if(subd != "") dest <- file.path(dest, subd)
-  if(!dir.exists(dest)) dir.create(dest, recursive = TRUE)
-  dest <- file.path(dest, outf)
+  fname <- basename(link)
+  outf <- ifelse(grepl(fname, pattern = "pdf$"), fname, paste0(fname, ".pdf"))
+  outf <- gsub(outf, pattern = " ", "_")
+  if(!dir.exists(subd)) dir.create(subd, recursive = TRUE)
+  dest <- file.path(subd, outf)
   return(dest)
 }
 
+#' Test if a file is a pdf
+#' 
+#' @param f Path to a file to test
+#' @return TRUE if pdftools::pdf_info thinks it's a PDF, else FALSE
+#' @export
+is_pdf <- function(f) {
+  res <- try(pdftools::pdf_info(f))
+  if(class(res) != "try-error") return(TRUE)
+  return(FALSE)
+}
 
 

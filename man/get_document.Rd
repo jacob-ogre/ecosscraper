@@ -4,14 +4,14 @@
 \alias{get_document}
 \title{GET a document from ECOS.}
 \usage{
-get_document(link, subd, pause = TRUE)
+get_document(url, subd, pause = TRUE)
 }
 \arguments{
-\item{link}{A URL from ECOS to download a document}
-
 \item{subd}{Subdirectory to which the document will be downloaded}
 
 \item{pause}{Whether to pause for 0.5-3 seconds during scraping}
+
+\item{link}{A URL from ECOS to download a document}
 }
 \value{
 A data.frame with destination and success

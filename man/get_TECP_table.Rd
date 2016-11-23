@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_links.R
 \name{get_TECP_table}
 \alias{get_TECP_table}
-\title{Get a table of T, E, C, and P data.}
+\title{Get a table of species-in-ECOS data}
 \usage{
 get_TECP_table()
 }
@@ -22,6 +22,7 @@ A data.frame with variables:
 }
 }
 \description{
+Returns threatened, endangered, candidate, and proposed species from ECOS.
 Use the URL set in options()$TE_list to get a data.frame that includes links
 for fetching data for any species with pages on TESS.
 }
