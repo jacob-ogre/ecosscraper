@@ -16,6 +16,8 @@ df, filtered for only five-year review links
 For when we want to just get the reviews.
 }
 \examples{
-# get_5yrev_links(all_links)
+\dontrun{
+  # get_5yrev_links(all_links)
+}
 }
 

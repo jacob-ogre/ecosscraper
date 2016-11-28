@@ -15,7 +15,7 @@ get_species_url(df, species)
 The URL of the species' ECOS profile
 }
 \description{
-Uses the species code in ecos_listed_spp data.frame to form the URL.
+Return the profile page on ECOS for a given species.
 }
 \examples{
 get_species_url("Ursus arctos horribilis")

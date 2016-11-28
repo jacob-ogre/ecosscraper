@@ -33,6 +33,6 @@ species name using the code.
 # get_species_links("Ursus maritimus")
 }
 \seealso{
-\link{remove_silly_links} \link{bulk_species_links}
+\link{remove_silly_links} \link{get_bulk_species_links}
 }
 

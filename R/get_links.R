@@ -1,7 +1,8 @@
 #' Get a table of species-in-ECOS data
 #'
 #' Returns threatened, endangered, candidate, and proposed species from ECOS.
-#' Use the URL set in options()$TE_list to get a data.frame that includes links
+#' 
+#' Uses the URL set in options()$TE_list to get a data.frame that includes links
 #' for fetching data for any species with pages on TESS.
 #'
 #' @return A data.frame with variables:
@@ -25,9 +26,6 @@
 #' all_spp <- get_TECP_table()
 #' head(all_spp)
 get_TECP_table <- function() {
-  # if(is.null(options()$TE_list)) {
-  #   
-  # }
   if(!httr::http_error(options()$TE_list)) {
     page <- xml2::read_html(options()$TE_list)
     tabl <- rvest::html_nodes(page, "table")
@@ -61,7 +59,7 @@ get_TECP_table <- function() {
 #' @export
 #' @examples
 #' # one or more lines to demo the function
-bulk_species_links <- function(data, ..., parallel = TRUE) {
+get_bulk_species_links <- function(data, ..., parallel = TRUE) {
   subdf <- dplyr::filter(data, ...)
   if(parallel) {
     result <- try(parallel::mclapply(subdf$Species_Page,
@@ -95,13 +93,12 @@ bulk_species_links <- function(data, ..., parallel = TRUE) {
 #'   \item{href}{The link as given on the ECOS page, if available}
 #'   \item{link}{The link, in absolute form, if available}
 #'   \item{text}{The anchor text of the <a> tag, if available}}
-#' @seealso \link{remove_silly_links} \link{bulk_species_links}
+#' @seealso \link{remove_silly_links} \link{get_bulk_species_links}
 #' @importFrom rvest html_nodes html_attr
 #' @export
 #' @examples
 #' # get_species_links("Ursus maritimus")
 get_species_links <- function(df, species, pause = TRUE, verbose = TRUE) {
-  # Want to warn, but also return an informative df
   err_res <- function(e, species) {
     warning(paste("Warning:", e, species))
     err_res <- data.frame(Scientific_Name = species,
@@ -198,8 +195,6 @@ is_species_profile <- function(page) {
 
 #' Return the profile page on ECOS for a given species.
 #'
-#' Uses the species code in ecos_listed_spp data.frame to form the URL.
-#'
 #' @param df A data.frame returned from get_TECP_table
 #' @param species The scientific name of a species, as given by ECOS
 #' @return The URL of the species' ECOS profile
@@ -209,8 +204,11 @@ is_species_profile <- function(page) {
 #' get_species_url("Ursus arctos horribilis")
 get_species_url <- function(df, species) {
   record <- dplyr::filter(df, Scientific_Name == species)
-  if(dim(record)[1] > 0) {
+  n_hits <- length(unique(record$Species_Page))
+  if(n_hits == 1) {
     return(record$Species_Page[1])
+  } else if(n_hits > 1) {
+    stop(paste("Multiple matches for", species, "in lookup"))
   } else {
     stop(paste(species, "not found in lookup"))
   }
@@ -225,7 +223,9 @@ get_species_url <- function(df, species) {
 #' @importFrom dplyr filter
 #' @export
 #' @examples
-#' # get_5yrev_links(all_links)
+#' \dontrun{
+#'   # get_5yrev_links(all_links)
+#' }
 get_5yrev_links <- function(df) {
   res <- dplyr::filter(df, grepl(href, pattern = "five_year_review"))
   return(res)
@@ -277,13 +277,18 @@ get_cons_plan_links <- function(df) {
 #' Get a listing of link suffixes for HCPs, SHA, and CCA/As.
 #'
 #' Uses the ECOS conservation plan page as the root and selects from dropdown.
+#' 
+#' THIS FUNCTION SHOULD BE DEPRECATED BECAUSE WE KNOW THE TESS CONSERVATION PLAN
+#' PORTAL IS MISSING PLANS THAT ARE LINKED ON SPECIES' PAGES.
 #'
 #' @return A data.frame with region, type, and suffix
 #' @importFrom rvest html_nodes html_attr
 #' @importFrom xml2 read_html
 #' @export
 #' @examples
-#' # EXAMPLE
+#' \dontrun{
+#'   agmt <- get_agreement_links()
+#' }
 get_agreement_links <- function() {
   regions <- seq(1, 9)
   types <- c("HCP", "SHA", "CCA", "CCAA")

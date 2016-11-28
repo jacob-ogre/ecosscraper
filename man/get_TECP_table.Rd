@@ -23,7 +23,9 @@ A data.frame with variables:
 }
 \description{
 Returns threatened, endangered, candidate, and proposed species from ECOS.
-Use the URL set in options()$TE_list to get a data.frame that includes links
+}
+\details{
+Uses the URL set in options()$TE_list to get a data.frame that includes links
 for fetching data for any species with pages on TESS.
 }
 \examples{

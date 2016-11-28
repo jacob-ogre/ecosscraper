@@ -12,7 +12,13 @@ A data.frame with region, type, and suffix
 \description{
 Uses the ECOS conservation plan page as the root and selects from dropdown.
 }
+\details{
+THIS FUNCTION SHOULD BE DEPRECATED BECAUSE WE KNOW THE TESS CONSERVATION PLAN
+PORTAL IS MISSING PLANS THAT ARE LINKED ON SPECIES' PAGES.
+}
 \examples{
-# EXAMPLE
+\dontrun{
+  agmt <- get_agreement_links()
+}
 }
 
