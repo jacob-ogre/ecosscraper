@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_links.R
 \name{get_5yrev_links}
 \alias{get_5yrev_links}
-\title{Get the links for five-year review documents.}
+\title{Get the links for ESA five-year review documents}
 \usage{
 get_5yrev_links(df)
 }
@@ -13,11 +13,13 @@ get_5yrev_links(df)
 df, filtered for only five-year review links
 }
 \description{
-For when we want to just get the reviews.
+Get the links for ESA five-year review documents
 }
 \examples{
 \dontrun{
-  # get_5yrev_links(all_links)
+  five_yr <- get_species_url("Ursus maritimus") \%>\% 
+               get_species_links() \%>\%
+               get_5yrev_links()
 }
 }
 

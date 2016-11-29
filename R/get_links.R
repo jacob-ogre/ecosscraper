@@ -35,7 +35,7 @@ get_bulk_species_links <- function(urls, parallel = TRUE) {
     result <- dplyr::bind_rows(result)
     return(result)
   }
-  stop("A scraping error occurred.")
+  stop("A scraping error occurred. Please check the traceback, if present.")
 }
 
 #' Return all links on a species' ECOS page
@@ -87,7 +87,31 @@ get_species_links <- function(url, clean = TRUE, pause = TRUE, verbose = TRUE) {
   return(res)
 }
 
-# Error with a data.frame return
+#' Return the profile page on ECOS for a given species.
+#'
+#' @param df A data.frame returned from get_TECP_table
+#' @param species The scientific name of a species, as given by ECOS
+#' @return The URL of the species' ECOS profile
+#' @importFrom dplyr filter
+#' @export
+#' @examples
+#' get_species_url("Ursus arctos horribilis")
+get_species_url <- function(species) {
+  if(!exists("TECP_table")) {
+    data("TECP_table")
+  }
+  record <- dplyr::filter(TECP_table, Scientific_Name == species)
+  n_hits <- length(unique(record$Species_Page))
+  if(n_hits == 1) {
+    return(record$Species_Page[1])
+  } else if(n_hits > 1) {
+    stop(paste("Multiple matches for", species, "in lookup"))
+  } else {
+    stop(paste(species, "not found in lookup"))
+  }
+}
+
+# Warning with a data.frame return
 err_res <- function(e, species) {
   warning(paste("Warning:", e, species))
   err_res <- data.frame(Scientific_Name = species,
@@ -98,7 +122,7 @@ err_res <- function(e, species) {
   return(err_res)
 }
 
-# Return the ECOS species profile for a given species.
+# Return the ECOS species profile for a given species
 #
 # Each species in ECOS has its own profile page, which can be scraped; this
 # simply returns the profile page.
@@ -147,18 +171,18 @@ fill_link <- function(x, base_ln) {
   return(x)
 }
 
-#' Check if the requested page is an ECOS profile page.
-#'
-#' ECOS will return a page rather than 404 if the species code is wrong. This
-#' checks that the page is not the "No species profile" page.
-#' 
-#' @param page An rvest read_html page
-#' @return logical; TRUE if a species profile, FALSE if "No species profile"
-#' @importFrom rvest html_text html_node
-#' @examples
-#' get_species_url("Ursus arctos horribilis") %>%
-#'   get_species_page() %>%
-#'   is_species_profile()
+# Check if the requested page is an ECOS profile page.
+#
+# ECOS will return a page rather than 404 if the species code is wrong. This
+# checks that the page is not the "No species profile" page.
+# 
+# @param page An rvest read_html page
+# @return logical; TRUE if a species profile, FALSE if "No species profile"
+# @importFrom rvest html_text html_node
+# @examples
+# get_species_url("Ursus arctos horribilis") %>%
+#   get_species_page() %>%
+#   is_species_profile()
 is_species_profile <- function(page) {
   text <- rvest::html_text(page)
   if(grepl(text, pattern = "No species profile", ignore.case = TRUE)) {
@@ -167,33 +191,7 @@ is_species_profile <- function(page) {
   return(TRUE)
 }
 
-#' Return the profile page on ECOS for a given species.
-#'
-#' @param df A data.frame returned from get_TECP_table
-#' @param species The scientific name of a species, as given by ECOS
-#' @return The URL of the species' ECOS profile
-#' @importFrom dplyr filter
-#' @export
-#' @examples
-#' get_species_url("Ursus arctos horribilis")
-get_species_url <- function(species) {
-  if(!exists("TECP_table")) {
-    data("TECP_table")
-  }
-  record <- dplyr::filter(TECP_table, Scientific_Name == species)
-  n_hits <- length(unique(record$Species_Page))
-  if(n_hits == 1) {
-    return(record$Species_Page[1])
-  } else if(n_hits > 1) {
-    stop(paste("Multiple matches for", species, "in lookup"))
-  } else {
-    stop(paste(species, "not found in lookup"))
-  }
-}
-
-#' Get the links for five-year review documents.
-#'
-#' For when we want to just get the reviews.
+#' Get the links for ESA five-year review documents from ECOS species' pages
 #'
 #' @param df A data.frame of species' links.
 #' @return df, filtered for only five-year review links
@@ -201,44 +199,46 @@ get_species_url <- function(species) {
 #' @export
 #' @examples
 #' \dontrun{
-#'   # get_5yrev_links(all_links)
+#'   five_yr <- get_species_url("Ursus arctos horribilis") %>% 
+#'                get_species_links() %>%
+#'                get_5yrev_links()
 #' }
 get_5yrev_links <- function(df) {
-  res <- dplyr::filter(df, grepl(href, pattern = "five_year_review"))
+  res <- dplyr::filter(df, grepl(df$href, pattern = "five_year_review"))
   return(res)
 }
 
-#' Get the links for recovery plans.
-#'
-#' For when we want to just get the recovery plans.
+#' Get the links for recovery plans on ECOS species' pages
 #'
 #' @param df A data.frame of species' links.
 #' @return df, filtered for only recovery plan links
 #' @importFrom dplyr filter
 #' @export
 #' @examples
-#' # get_recovery_links(all_links)
+#'   recovery <- get_species_url("Ursus arctos horribilis") %>% 
+#'                 get_species_links() %>%
+#'                 get_recovery_links()
 get_recovery_links <- function(df) {
   res <- dplyr::filter(df, grepl(href, pattern = "recovery_plan"))
   return(res)
 }
 
-#' Get the links for Federal Register documents.
+#' Get the links for Federal Register documents on ECOS species' pages
 #'
-#' For when we want to just get the Fed. Reg. documents.
-#'
-#' @param df A data.frame of species' links.
+#' @param df A data.frame of links from \link{get_species_links}
 #' @return df, filtered for only Fed. Reg. links
 #' @importFrom dplyr filter
 #' @export
 #' @examples
-#' # get_fedreg_links(all_links)
+#'   fed_reg <- get_species_url("Ursus arctos horribilis") %>% 
+#'                get_species_links() %>%
+#'                get_fedreg_links()
 get_fedreg_links <- function(df) {
   res <- dplyr::filter(df, grepl(href, pattern = "federal_register|gpo"))
   return(res)
 }
 
-#' Get the links to conservation plan pages.
+#' Get the links to conservation plan pages on ECOS species' pages
 #'
 #' @param df A data.frame of species' links.
 #' @return df, filtered for links to conservation plans (SHA, HCP, CCAA)
