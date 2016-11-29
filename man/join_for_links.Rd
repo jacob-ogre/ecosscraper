@@ -4,14 +4,14 @@
 \alias{join_for_links}
 \title{Join an ECOS table of text with the links to documents}
 \usage{
-join_for_links(tab, links, sp)
+join_for_links(tab, links, species)
 }
 \arguments{
 \item{tab}{The table (as a data.frame) to be joined if it has a Title var}
 
 \item{links}{A data.frame with the Title of the link and the URL}
 
-\item{sp}{The scientific name to be included in the returned data.frame}
+\item{species}{The scientific name to be included in the returned data.frame}
 }
 \value{
 A data.frame with URL, if tab includes a Title variable
@@ -19,8 +19,8 @@ A data.frame with URL, if tab includes a Title variable
 \description{
 Extracting tables with links in cells using rvest isn't straight-forward.
 But by listing the links with \code{html_nodes(..., "href")} and the link 
-text with \code{html_text(...)} (i.e., the title), then joining with the 
-table Title field, we can associate every doc link with the other fields
-in the table.
+text with \code{html_text(...)} (i.e., the link title), then joining with the 
+table Title field, we can associate every doc link with the other fields in 
+the table.
 }
 

@@ -4,13 +4,12 @@ library(dplyr)
 library(ecosscraper)
 library(parallel)
 
-data("TECP_domestic")
-
 # Let's try to get all of the ECOS tables...for domestic species, at least
+TECP_domestic <- filter_domestic(TECP_table) %>% filter_listed()
 species <- unique(TECP_domestic$Species_Page)
 # ECOS_tabs <- parallel::mclapply(species, get_tables, mc.cores = 6)
-ECOS_tabs <- lapply(species, get_tables)
-names(ECOS_tabs) <- unique(TECP_domestic$Scientific_Name)
+ECOS_tabs <- lapply(species[1:4], get_tables)
+names(ECOS_tabs) <- unique(TECP_domestic$Scientific_Name[1:4])
 save(ECOS_tabs, file = "data-raw/ECOS_tabs.rda")
 
 species_info_table <- distinct(bind_tables(ECOS_tabs, "SP_TAB"))

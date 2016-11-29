@@ -22,6 +22,12 @@ The category for the table; one of
   }
 }
 \description{
-More detailed description of the function
+Return the category of ECOS table
+}
+\details{
+Each species' ECOS page contains several tables, but which tables
+are present on any given page can vary. The tables are not given attr IDs, 
+which would allow easy identification of the table types, so we use the 
+headings of each table to determine the types.
 }
 

@@ -1,47 +1,3 @@
-#' Get a table of species-in-ECOS data
-#'
-#' Returns threatened, endangered, candidate, and proposed species from ECOS.
-#' 
-#' Uses the URL set in options()$TE_list to get a data.frame that includes links
-#' for fetching data for any species with pages on TESS.
-#'
-#' @return A data.frame with variables:
-#' \itemize{
-#'   \item Scientific_Name
-#'   \item Common_Name
-#'   \item Species_Code
-#'   \item Critical_Habitat
-#'   \item Species_Group
-#'   \item Lead_Region
-#'   \item Federal_Listing_Status
-#'   \item Special_Rules
-#'   \item Where_Listed
-#'   \item Species_Page
-#' }
-#' @importFrom rvest html_nodes html_table
-#' @importFrom xml2 read_html
-#' @importFrom httr http_error
-#' @export
-#' @examples
-#' all_spp <- get_TECP_table()
-#' head(all_spp)
-get_TECP_table <- function() {
-  if(!httr::http_error(options()$TE_list)) {
-    page <- xml2::read_html(options()$TE_list)
-    tabl <- rvest::html_nodes(page, "table")
-    all_spp <- as.data.frame(rvest::html_table(tabl))
-    names(all_spp) <- gsub(x = names(all_spp), 
-                           pattern = ".", 
-                           replacement = "_",
-                           fixed = TRUE)
-    all_spp$Species_Page <- paste0(options()$ECOS_sp_prefix,
-                                   all_spp$Species_Code)
-    return(all_spp)
-  } else {
-    stop("Cannot get the website to scrape the TECP table.")
-  }
-}
-
 #' Gather all links for all or a subset of ECOS species.
 #'
 #' Collects all of the links (<a href...>) from ECOS for species.
@@ -146,16 +102,21 @@ get_species_links <- function(df, species, pause = TRUE, verbose = TRUE) {
 get_species_page <- function(url) {
   url <- URLencode(url)
   if(!httr::http_error(url)) {
-    page <- try(read_html(url))
-    if(class(page)[1] != "try-error") {
+    page <- try(xml2::read_html(url))
+    if(class(page[1]) != "try-error") {
       if(is_species_profile(page)) {
         return(page)
       } else {
-        stop(paste(url, "not a link to a species profile"))
+        warning(paste(url, "not a link to a species profile"))
+        return(NULL)
       }
     } else {
-      stop(paste("Error reading", url))
+      warning(paste("Error reading", url))
+      return(NULL)
     }
+  } else {
+    warning(paste("http_error for", url))
+    return(NULL)
   }
 }
 
@@ -179,6 +140,7 @@ fill_link <- function(x, base_ln) {
 #'
 #' ECOS will return a page rather than 404 if the species code is wrong. This
 #' checks that the page is not the "No species profile" page.
+#' 
 #' @param page An rvest read_html page
 #' @return logical; TRUE if a species profile, FALSE if "No species profile"
 #' @importFrom rvest html_text html_node
@@ -186,9 +148,9 @@ fill_link <- function(x, base_ln) {
 #' @examples
 #' # one or more lines to demo the function
 is_species_profile <- function(page) {
-  h3 <- try(rvest::html_node(page, "h3"), silent = TRUE)
-  if(class(h3) != "try-error") {
-    if(rvest::html_text(h3) == "No species profile") return(FALSE)
+  text <- rvest::html_text(page)
+  if(grepl(text, pattern = "No species profile", ignore.case = TRUE)) {
+    return(FALSE)
   }
   return(TRUE)
 }

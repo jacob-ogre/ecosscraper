@@ -13,7 +13,7 @@ bind_tables(ls, table)
 A data.frame of type specified by \code{table}
 }
 \description{
-More detailed description of the function
+Extract named tables from a list of tables extracted for species
 }
 \examples{
 \dontrun{

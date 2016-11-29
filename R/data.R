@@ -21,11 +21,12 @@
 #'   \item{Lead_Region}{FWS region responsible for recovery}
 #'   \item{Federal_Listing_Status}{At time of scraping}
 #'   \item{Special_Rules}{CFR section under which any special rules were made}
+#'   \item{U_S__or_ForeignListed}{One of US, US/Foreign, Foreign}
 #'   \item{Where_Listed}{Geographic extent of listed entity}
 #'   \item{Species_Page}{URL dedicated to the species on ECOS}
 #' }
 #' @source \link{http://ecos.fws.gov/tess_public}
-"TECP"
+"TECP_table"
 
 # #' Data.frame of base information for domestic ECOS species
 # #'
