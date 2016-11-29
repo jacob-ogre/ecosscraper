@@ -2,8 +2,9 @@
 #'
 #' Returns threatened, endangered, candidate, and proposed species from ECOS.
 #' 
-#' Uses the URL set in options()$TE_list to get a data.frame that includes links
-#' for fetching data for any species with pages on TESS.
+#' @details Uses the URL set in options()$TE_list to get a data.frame that 
+#' includes links for fetching data for any species with pages on TESS. This 
+#' data is loaded
 #'
 #' @return A data.frame with 11 variables:
 #' \itemize{
@@ -24,8 +25,9 @@
 #' @importFrom httr http_error
 #' @export
 #' @examples
-#' all_spp <- get_TECP_table()
-#' head(all_spp)
+#' # To replace the TECP_table that is loaded on startup (attach)
+#' TECP_table <- get_TECP_table()
+#' head(TECP_table)
 get_TECP_table <- function() {
   if(!httr::http_error(options()$TE_list)) {
     page <- xml2::read_html(options()$TE_list)

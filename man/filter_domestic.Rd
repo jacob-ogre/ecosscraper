@@ -2,7 +2,7 @@
 % Please edit documentation in R/filters.R
 \name{filter_domestic}
 \alias{filter_domestic}
-\title{Remove entirely foreign species from a TECP data.frame}
+\title{Filter TECP_table to return only domestic ESA-listed species}
 \usage{
 filter_domestic(df)
 }
@@ -15,7 +15,7 @@ filter_domestic(df)
 A data.frame containing only domestic species
 }
 \description{
-Remove entirely foreign species from a TECP data.frame
+Filter TECP_table to return only domestic ESA-listed species
 }
 \details{
 Expects a data.frame from get_TECP_table. The df may have already 

@@ -4,12 +4,12 @@
 \alias{get_species_url}
 \title{Return the profile page on ECOS for a given species.}
 \usage{
-get_species_url(df, species)
+get_species_url(species)
 }
 \arguments{
-\item{df}{A data.frame returned from get_TECP_table}
-
 \item{species}{The scientific name of a species, as given by ECOS}
+
+\item{df}{A data.frame returned from get_TECP_table}
 }
 \value{
 The URL of the species' ECOS profile

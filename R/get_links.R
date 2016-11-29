@@ -1,12 +1,12 @@
-#' Gather all links for all or a subset of ECOS species.
+#' Gather all links for all or a subset of ECOS species
 #'
-#' Collects all of the links (<a href...>) from ECOS for species.
+#' Collects all of the links (URLs) from ECOS for a set of species.
 #'
-#' Automates the process of gathering links, which may in turn be followed or,
-#' in the case of documents or tables, be downloaded. 
+#' @details Automates the process of gathering links, which may in turn be 
+#' followed or, in the case of documents or tables, be downloaded. This is a
+#' convenience wrapper over \link{get_species_links}.
 #'
-#' @param data A data.frame with 
-#' @param ... Zero or more filter conditions as used in \code{dplyr::filter}
+#' @param data A data.frame derived from TECP_table
 #' @param parallel TRUE (default) to try parallel scraping
 #' @return A data.frame with links, species, etc.
 #' @seealso \link{remove_silly_links} \link{get_species_links}
@@ -14,68 +14,62 @@
 #' @importFrom parallel mclapply
 #' @export
 #' @examples
-#' # one or more lines to demo the function
-get_bulk_species_links <- function(data, ..., parallel = TRUE) {
-  subdf <- dplyr::filter(data, ...)
+#' \dontrun{
+#'   res <- get_bulk_species_links(TECP_table[1:3, ])
+#' }
+get_bulk_species_links <- function(df, parallel = TRUE) {
   if(parallel) {
-    result <- try(parallel::mclapply(subdf$Species_Page,
+    result <- try(parallel::mclapply(df$Species_Page,
                                      FUN = get_species_links,
                                      mc.cores = 3))
   } else {
-    result <- try(lapply(subdf$Scientific_Name, FUN = get_species_links))
+    result <- try(lapply(df$Species_Page, FUN = get_species_links))
   }
   if(class(result[1]) != "try-error") {
-    result <- dplyr::rbind_all(result)
+    result <- dplyr::bind_rows(result)
     return(result)
   }
   stop("A scraping error occurred.")
 }
 
-#' Return all links on a species' ECOS page.
+#' Return all links on a species' ECOS page
 #'
-#' Return a data.frame with links and their text, from a species' page on ECOS.
+#' Return a data.frame with links (and their text) from a species' page on ECOS.
 #' 
-#' This function has a bunch of \code{try} statements because errors were 
-#' very common during testing, though some of that may have been because of
-#' slow internet connections. In a future iteration I {may, will likely} change
-#' the search parameter to the species code (4-char alphanum), and fetch the
-#' species name using the code.
-#' 
-#' @param species Scientific name of a species, as given on ECOS
-#' @param pause TRUE for a 0-3 second pause to be nice to the server
-#' @return A 1-row data.frame with variables:
+#' @param url The URL of a species' page on ECOS; see Example
+#' @param clean Remove useless links (e.g., www.usa.gov) [default = TRUE]
+#' @param pause 0.5-3 second pause to be nice to the server [default = TRUE]
+#' @param verbose Message the species being processed [default = TRUE]
+#' @return A data.frame with variables:
 #' \describe{
 #'   \item{Scientific_Name}{The species' scientific name, as given by ECOS}
 #'   \item{href}{The link as given on the ECOS page, if available}
 #'   \item{link}{The link, in absolute form, if available}
-#'   \item{text}{The anchor text of the <a> tag, if available}}
+#'   \item{text}{The anchor text of the <a> tag, if available}
+#' }
 #' @seealso \link{remove_silly_links} \link{get_bulk_species_links}
 #' @importFrom rvest html_nodes html_attr
 #' @export
 #' @examples
-#' # get_species_links("Ursus maritimus")
-get_species_links <- function(df, species, pause = TRUE, verbose = TRUE) {
-  err_res <- function(e, species) {
-    warning(paste("Warning:", e, species))
-    err_res <- data.frame(Scientific_Name = species,
-                        href = "No page",
-                        link = "No page",
-                        text = "No page",
-                        stringsAsFactors = FALSE)
-    return(err_res)
+#' res <- get_species_url("Ursus maritimus") %>% get_species_links()
+#' head(res)
+get_species_links <- function(url, clean = TRUE, pause = TRUE, verbose = TRUE) {
+  if(!exists("TECP_table")) {
+    data("TECP_table")
   }
+  record <- dplyr::filter(TECP_table, Species_Page == url)
+  species <- unique(record$Scientific_Name)
 
   if(pause == TRUE) Sys.sleep(runif(1, 0, 3))
-  if(verbose) print(paste("Fetching page for", species))
-  base_ln <- try(get_species_url(df, species))
-  if(class(base_ln) == "try-error") err_res("URL not found for", species)
-  page <- try(get_species_page(base_ln))
-  if(is.null(page) | class(page[1]) == "try-error") {
+  if(verbose) message(paste("Fetching page for", species))
+  page <- get_species_page(record$Species_Page)
+  if(is.null(page)) {
     err_res("Error getting page for", species)
   }
   a_nodes <- try(rvest::html_nodes(page, "a"))
   if(class(a_nodes) == "try-error") err_res("No <a> nodes for", species)
   hrefs <- rvest::html_attr(a_nodes, "href")
+  base_ln <- dirname(url)
   full_ln <- simplify2array(lapply(hrefs, FUN = fill_link, base_ln))
   texts <- html_text(a_nodes)
   res <- data.frame(Scientific_Name = rep(species, length(hrefs)),
@@ -83,22 +77,35 @@ get_species_links <- function(df, species, pause = TRUE, verbose = TRUE) {
                     link = full_ln,
                     text = texts,
                     stringsAsFactors = FALSE)
+  if(clean) res <- remove_silly_links(res)
   return(res)
 }
 
-#' Return the ECOS species profile for a given species.
-#'
-#' Each species in ECOS has its own profile page, which can be scraped; this
-#' simply returns the profile page.
-#'
-#' There are several \code{try} statements because of the persnickettiness of
-#' ECOS and/or to guard against bad species names. Most errors are caught by
-#' \link{get_species_url}.
-#' @param url The url for a species' ECOS profile
-#' @return A page returned by \code{rvest::read_html}
-#' @export
-#' @examples
-#' # one or more lines to demo the function
+# Error with a data.frame return
+err_res <- function(e, species) {
+  warning(paste("Warning:", e, species))
+  err_res <- data.frame(Scientific_Name = species,
+                      href = "No page",
+                      link = "No page",
+                      text = "No page",
+                      stringsAsFactors = FALSE)
+  return(err_res)
+}
+
+# Return the ECOS species profile for a given species.
+#
+# Each species in ECOS has its own profile page, which can be scraped; this
+# simply returns the profile page.
+#
+# There are several \code{try} statements because of the persnickettiness of
+# ECOS and/or to guard against bad species names. Most errors are caught by
+# \link{get_species_url}.
+# @param url The url for a species' ECOS profile
+# @return A page returned by \code{rvest::read_html}
+# @examples
+# \dontrun{
+#   page <- get_species_url("Abies guatemalensis") %>% get_species_page()
+# }
 get_species_page <- function(url) {
   url <- URLencode(url)
   if(!httr::http_error(url)) {
@@ -120,19 +127,17 @@ get_species_page <- function(url) {
   }
 }
 
-#' Fill relative links with appropriate prefix.
-#' 
-#' @param x A link (href) string; may be relative or absolute
-#' @param base_ln A string indicating the base URL of current page
-#' @return The complete link, as available.
-#' @examples
-#' # None at the moment...
+# Fill relative links with appropriate prefix
+# 
+# @param x A link (href) string; may be relative or absolute
+# @param base_ln A string indicating the base URL of current page
+# @return The complete link, as available.
 fill_link <- function(x, base_ln) {
   base_url <- "http://ecos.fws.gov"
   if(is.na(x)) return(NA)
-  if(length(grep(x, pattern = "^http")) == 1) return(x)
-  if(length(grep(x, pattern = "^/")) == 1) return(paste0(base_url, x))
-  if(length(grep(x, pattern = "^#")) == 1) return(paste0(base_ln, x))
+  if(grepl(x, pattern = "^http")) return(x)
+  if(grepl(x, pattern = "^/")) return(paste0(base_url, x))
+  if(grepl(x, pattern = "^#")) return(paste0(base_ln, x))
   return(x)
 }
 
@@ -144,9 +149,10 @@ fill_link <- function(x, base_ln) {
 #' @param page An rvest read_html page
 #' @return logical; TRUE if a species profile, FALSE if "No species profile"
 #' @importFrom rvest html_text html_node
-#' @export
 #' @examples
-#' # one or more lines to demo the function
+#' get_species_url("Ursus arctos horribilis") %>%
+#'   get_species_page() %>%
+#'   is_species_profile()
 is_species_profile <- function(page) {
   text <- rvest::html_text(page)
   if(grepl(text, pattern = "No species profile", ignore.case = TRUE)) {
@@ -164,8 +170,11 @@ is_species_profile <- function(page) {
 #' @export
 #' @examples
 #' get_species_url("Ursus arctos horribilis")
-get_species_url <- function(df, species) {
-  record <- dplyr::filter(df, Scientific_Name == species)
+get_species_url <- function(species) {
+  if(!exists("TECP_table")) {
+    data("TECP_table")
+  }
+  record <- dplyr::filter(TECP_table, Scientific_Name == species)
   n_hits <- length(unique(record$Species_Page))
   if(n_hits == 1) {
     return(record$Species_Page[1])

@@ -4,8 +4,8 @@
 \name{TECP_table}
 \alias{TECP_table}
 \title{Data.frame of base information for all ECOS species}
-\format{A data frame with 2474 rows and 10 variables
-\itemize{
+\format{A data frame with 2445 rows and 10 variables
+\describe{
   \item{Scientific_Name}{The scientific name, as recorded in ECOS}
   \item{Common_Name}{The common name, as recorded in ECOS}
   \item{Species_Code}{The four-character code assigned to species in ECOS}
@@ -25,17 +25,31 @@
 TECP_table
 }
 \description{
-The data is the table returned using the URL:
+Data.frame of base information for all ECOS species
 }
 \details{
-http://ecos.fws.gov/tess_public/reports/ad-hoc-species-report?kingdom=V&
+The data is the table returned using the URL:
+
+\url{http://ecos.fws.gov/tess_public/reports/ad-hoc-species-report?kingdom=V&
 kingdom=I&kingdom=P&status=E&status=T&status=EmE&status=EmT&status=EXPE&
 status=EXPN&status=SAE&status=SAT&status=C&status=P&fcrithab=on&fstatus=on&
-fspecrule=on&finvpop=on&fgroup=on&fleadreg=on&fspcode=on&header=
-Listed+Species
+fspecrule=on&finvpop=on&fgroup=on&fleadreg=on&fspcode=on&fmapstatus=on&
+header=Listed+Species}
 
-which can be set using options()$TE_list. The current data was scraped on
-\code{21 June 2016}.
+By default, \code{ecosscraper} checks this URL \code{.onAttach} to ensure - 
+assuming the user restarts their sessions regularly - that the source is 
+up-to-date. If the URL throws a \link[httr]{http_error} then this built-in
+data.frame will be loaded.
+}
+\note{
+Also notice that \code{ecosscraper} includes \link{get_TECP_table}, 
+which can be used to 'override' the built-in data.
+
+The source URL can be changed using options()$TE_list. The current data 
+was scraped on \code{29 Nov 2016}
+}
+\seealso{
+\link{get_TECP_table}
 }
 \keyword{datasets}
 

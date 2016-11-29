@@ -23,13 +23,24 @@ remove_silly_links <- function(df, patterns = list()) {
   return(filt)
 }
 
-#' Set the URL of the TESS table
+#' Get a data.frame of links and their titles from a web page
+#' 
+#' @importFrom rvest html_nodes html_attr html_text
 #' @export
-set_TE_list_opt <- function() {
-  options("TE_list" = "http://ecos.fws.gov/tess_public/reports/ad-hoc-species-report?kingdom=V&kingdom=I&kingdom=P&status=E&status=T&status=EmE&status=EmT&status=EXPE&status=EXPN&status=SAE&status=SAT&status=C&status=P&fcrithab=on&fstatus=on&fspecrule=on&finvpop=on&fgroup=on&fleadreg=on&fspcode=on&fmapstatus=on&header=Listed+Species")
-}
+get_link_table <- function(pg) {
+  a_nodes <- rvest::html_nodes(pg, "a")
+  pg_links <- rvest::html_attr(a_nodes, "href")
+  link_txt <- rvest::html_text(a_nodes)
+  link_tbl <- data.frame(Doc_Link = pg_links, 
+                         Title = link_txt,
+                         stringsAsFactors = FALSE)
+  return(link_tbl)
+} 
 
-# update_TECP_table <- function() {
-#   TECP_table <- get_TECP_table()
-#   devtools::use_data(TECP_table, overwrite = TRUE)
-# }
+#' Set the URL of the TESS table
+#' 
+#' @param url The new URL from which the base TESS data is scraped
+#' @export
+set_TE_list_opt <- function(url) {
+  options("TE_list" = url)
+}

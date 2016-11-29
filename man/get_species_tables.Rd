@@ -11,7 +11,7 @@ get_species_tables(url)
 }
 \value{
 A list of tables, named per \link{get_table_type}, and one
-  table that records information about the scrape
+  table (\code{scrape_info}) that records information about the scrape
 }
 \description{
 Get all tables from a species' ECOS page

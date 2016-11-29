@@ -17,6 +17,8 @@ ECOS will return a page rather than 404 if the species code is wrong. This
 checks that the page is not the "No species profile" page.
 }
 \examples{
-# one or more lines to demo the function
+get_species_url("Ursus arctos horribilis") \%>\%
+  get_species_page() \%>\%
+  is_species_profile()
 }
 

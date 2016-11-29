@@ -2,29 +2,30 @@
 % Please edit documentation in R/get_links.R
 \name{get_bulk_species_links}
 \alias{get_bulk_species_links}
-\title{Gather all links for all or a subset of ECOS species.}
+\title{Gather all links for all or a subset of ECOS species}
 \usage{
-get_bulk_species_links(data, ..., parallel = TRUE)
+get_bulk_species_links(df, parallel = TRUE)
 }
 \arguments{
-\item{data}{A data.frame with}
-
-\item{...}{Zero or more filter conditions as used in \code{dplyr::filter}}
-
 \item{parallel}{TRUE (default) to try parallel scraping}
+
+\item{data}{A data.frame derived from TECP_table}
 }
 \value{
 A data.frame with links, species, etc.
 }
 \description{
-Collects all of the links (<a href...>) from ECOS for species.
+Collects all of the links (URLs) from ECOS for a set of species.
 }
 \details{
-Automates the process of gathering links, which may in turn be followed or,
-in the case of documents or tables, be downloaded.
+Automates the process of gathering links, which may in turn be 
+followed or, in the case of documents or tables, be downloaded. This is a
+convenience wrapper over \link{get_species_links}.
 }
 \examples{
-# one or more lines to demo the function
+\dontrun{
+  res <- get_bulk_species_links(TECP_table[1:3, ])
+}
 }
 \seealso{
 \link{remove_silly_links} \link{get_species_links}

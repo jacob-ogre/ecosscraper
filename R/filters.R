@@ -1,4 +1,4 @@
-#' Remove entirely foreign species from a TECP data.frame
+#' Filter TECP_table to return only domestic ESA-listed species
 #'
 #' @details Expects a data.frame from get_TECP_table. The df may have already 
 #' passed through another filter (e.g., filter_listed), but must contain the 
@@ -17,7 +17,7 @@ filter_domestic <- function(df) {
   return(filt)
 }
 
-#' Remove candidate and proposed species from a TECP data.frame
+#' Filter TECP_table to return only threatened and endangered species
 #'
 #' @details Expects a data.frame from get_TECP_table. The df may have already 
 #' passed through another filter (e.g., filter_domestic), but must contain the 
@@ -37,7 +37,7 @@ filter_listed <- function(df) {
   return(filt)
 }
 
-#' Return species from a specific taxonomic group TECP data.frame
+#' Filter TECP_table to return only species from a given taxonomic group
 #'
 #' @details Expects a data.frame from get_TECP_table. The df may have already 
 #' passed through another filter (e.g., filter_domestic), but must contain the 

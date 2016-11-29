@@ -2,7 +2,7 @@
 % Please edit documentation in R/filters.R
 \name{filter_taxa}
 \alias{filter_taxa}
-\title{Return species from a specific taxonomic group TECP data.frame}
+\title{Filter TECP_table to return only species from a given taxonomic group}
 \usage{
 filter_taxa(df, group = c())
 }
@@ -33,7 +33,7 @@ filter_taxa(df, group = c())
 A data.frame containing only species from the selected taxa
 }
 \description{
-Return species from a specific taxonomic group TECP data.frame
+Filter TECP_table to return only species from a given taxonomic group
 }
 \details{
 Expects a data.frame from get_TECP_table. The df may have already 

@@ -26,11 +26,13 @@ A data.frame with 11 variables:
 Returns threatened, endangered, candidate, and proposed species from ECOS.
 }
 \details{
-Uses the URL set in options()$TE_list to get a data.frame that includes links
-for fetching data for any species with pages on TESS.
+Uses the URL set in options()$TE_list to get a data.frame that 
+includes links for fetching data for any species with pages on TESS. This 
+data is loaded
 }
 \examples{
-all_spp <- get_TECP_table()
-head(all_spp)
+# To replace the TECP_table that is loaded on startup (attach)
+TECP_table <- get_TECP_table()
+head(TECP_table)
 }
 

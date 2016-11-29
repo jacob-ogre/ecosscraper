@@ -4,7 +4,10 @@
 \alias{set_TE_list_opt}
 \title{Set the URL of the TESS table}
 \usage{
-set_TE_list_opt()
+set_TE_list_opt(url)
+}
+\arguments{
+\item{url}{The new URL from which the base TESS data is scraped}
 }
 \description{
 Set the URL of the TESS table

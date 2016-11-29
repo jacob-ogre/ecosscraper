@@ -2,7 +2,7 @@
 % Please edit documentation in R/filters.R
 \name{filter_listed}
 \alias{filter_listed}
-\title{Remove candidate and proposed species from a TECP data.frame}
+\title{Filter TECP_table to return only threatened and endangered species}
 \usage{
 filter_listed(df)
 }
@@ -15,7 +15,7 @@ filter_listed(df)
 A data.frame containing only ESA-listed species
 }
 \description{
-Remove candidate and proposed species from a TECP data.frame
+Filter TECP_table to return only threatened and endangered species
 }
 \details{
 Expects a data.frame from get_TECP_table. The df may have already 

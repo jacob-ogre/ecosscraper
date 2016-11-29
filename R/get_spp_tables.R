@@ -4,7 +4,7 @@
 #'
 #' @param url The path to the species' ECOS page
 #' @return A list of tables, named per \link{get_table_type}, and one
-#'   table that records information about the scrape
+#'   table (\code{scrape_info}) that records information about the scrape
 #' @seealso \link{get_table}, \link{get_table_type}
 #' 
 #' @importFrom rvest html_text html_nodes html_attr
@@ -42,8 +42,7 @@ get_species_tables <- function(url) {
 #' @seealso \link{get_tables}
 #' @importFrom rvest html_table
 get_table <- function(tab) {
-  res <- try(suppressWarnings(
-               rvest::html_table(tab, fill = TRUE)), silent = TRUE)
+  res <- try(suppressWarnings(html_table(tab, fill = TRUE)), silent = TRUE)
   if(class(res) != "try-error") {
     return(res)
   } else {
@@ -51,19 +50,19 @@ get_table <- function(tab) {
   }
 }
 
-#' Join an ECOS table of text with the links to documents
-#' 
-#' Extracting tables with links in cells using rvest isn't straight-forward.
-#' But by listing the links with \code{html_nodes(..., "href")} and the link 
-#' text with \code{html_text(...)} (i.e., the link title), then joining with the 
-#' table Title field, we can associate every doc link with the other fields in 
-#' the table.
-#'
-#' @param tab The table (as a data.frame) to be joined if it has a Title var
-#' @param links A data.frame with the Title of the link and the URL
-#' @param species The scientific name to be included in the returned data.frame
-#' @return A data.frame with URL, if tab includes a Title variable
-#' @importFrom dplyr left_join
+# Join an ECOS table of text with the links to documents
+# 
+# Extracting tables with links in cells using rvest isn't straight-forward.
+# But by listing the links with \code{html_nodes(..., "href")} and the link 
+# text with \code{html_text(...)} (i.e., the link title), then joining with the 
+# table Title field, we can associate every doc link with the other fields in 
+# the table.
+#
+# @param tab The table (as a data.frame) to be joined if it has a Title var
+# @param links A data.frame with the Title of the link and the URL
+# @param species The scientific name to be included in the returned data.frame
+# @return A data.frame with URL, if tab includes a Title variable
+# @importFrom dplyr left_join
 join_for_links <- function(tab, links, species) {
   if(!is.null(tab)) {
     if("Title" %in% names(tab)) {
@@ -77,24 +76,24 @@ join_for_links <- function(tab, links, species) {
   return(NULL)
 }
 
-#' Return the category of ECOS table
-#'
-#' @details Each species' ECOS page contains several tables, but which tables
-#' are present on any given page can vary. The tables are not given attr IDs, 
-#' which would allow easy identification of the table types, so we use the 
-#' headings of each table to determine the types.
-#' 
-#' @param df A data.frame from an ECOS table
-#' @return The category for the table; one of
-#'   \itemize{
-#'     \item{SP_TAB}{A table with basic listed species information}
-#'     \item{FR_TAB}{A table with Federal Register documents}
-#'     \item{CH_TAB}{A table with critical habitat documents}
-#'     \item{REC_TAB}{A table with recovery plan information}
-#'     \item{DOC_TAB}{A table with additional documents}
-#'     \item{REV_TAB}{A table with 5-year review documents}
-#'     \item{others}{One of several table types, e.g., HCP documents}
-#'   }
+# Return the category of ECOS table
+#
+# @details Each species' ECOS page contains several tables, but which tables
+# are present on any given page can vary. The tables are not given attr IDs, 
+# which would allow easy identification of the table types, so we use the 
+# headings of each table to determine the types.
+# 
+# @param df A data.frame from an ECOS table
+# @return The category for the table; one of
+#   \itemize{
+#     \item{SP_TAB}{A table with basic listed species information}
+#     \item{FR_TAB}{A table with Federal Register documents}
+#     \item{CH_TAB}{A table with critical habitat documents}
+#     \item{REC_TAB}{A table with recovery plan information}
+#     \item{DOC_TAB}{A table with additional documents}
+#     \item{REV_TAB}{A table with 5-year review documents}
+#     \item{others}{One of several table types, e.g., HCP documents}
+#   }
 get_table_type <- function(df) {
   SP_TAB <- c("Status", "Date Listed", "Lead Region", "Where Listed", "Species")
   FR_TAB <- c("Date", "Citation Page", "Title", "Doc_Link", "Species")
@@ -125,13 +124,12 @@ get_table_type <- function(df) {
   }
 }
 
-#' Get a summary data.frame of an ECOS page scrape
-#' 
-#' @param pg An ECOS species page from \link{get_species_page}
-#' @param url The url of the species page
-#' @param species The scientific name of the species whose page was scraped
-#' @importFrom rvest html_nodes html_attr html_text
-#' @export
+# Get a summary data.frame of an ECOS page scrape
+# 
+# @param pg An ECOS species page from \link{get_species_page}
+# @param url The url of the species page
+# @param species The scientific name of the species whose page was scraped
+# @importFrom rvest html_nodes html_attr html_text
 get_species_page_summary <- function(pg, url, species) {
   page_txt <- rvest::html_text(pg)
   md5_hash <- digest::digest(page_txt)
@@ -143,20 +141,6 @@ get_species_page_summary <- function(pg, url, species) {
   return(tab_1)
 }
   
-#' Get a data.frame of links and their titles from a web page
-#' 
-#' @importFrom rvest html_nodes html_attr html_text
-#' @export
-get_link_table <- function(pg) {
-  a_nodes <- rvest::html_nodes(pg, "a")
-  pg_links <- rvest::html_attr(a_nodes, "href")
-  link_txt <- rvest::html_text(a_nodes)
-  link_tbl <- data.frame(Doc_Link = pg_links, 
-                         Title = link_txt,
-                         stringsAsFactors = FALSE)
-  return(link_tbl)
-} 
-
 #' Extract named tables from a list of tables extracted for species
 #'
 #' @param ls The list of tables from \link{get_tables}

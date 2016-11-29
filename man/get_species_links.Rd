@@ -2,14 +2,14 @@
 % Please edit documentation in R/get_links.R
 \name{get_species_links}
 \alias{get_species_links}
-\title{Return all links on a species' ECOS page.}
+\title{Return all links on a species' ECOS page}
 \usage{
-get_species_links(df, species, pause = TRUE, verbose = TRUE)
+get_species_links(url, clean = TRUE, pause = TRUE, verbose = TRUE)
 }
 \arguments{
-\item{species}{Scientific name of a species, as given on ECOS}
-
 \item{pause}{TRUE for a 0-3 second pause to be nice to the server}
+
+\item{species}{Scientific name of a species, as given on ECOS}
 }
 \value{
 A 1-row data.frame with variables:
@@ -30,7 +30,8 @@ the search parameter to the species code (4-char alphanum), and fetch the
 species name using the code.
 }
 \examples{
-# get_species_links("Ursus maritimus")
+res <- get_species_url("Ursus maritimus") \%>\% get_species_links()
+head(res)
 }
 \seealso{
 \link{remove_silly_links} \link{get_bulk_species_links}
