@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_links.R
 \name{get_bulk_species_links}
 \alias{get_bulk_species_links}
-\title{Gather all links for all or a subset of ECOS species}
+\title{Gather all links for all or a subset of species on ECOS}
 \usage{
 get_bulk_species_links(urls, parallel = TRUE)
 }
@@ -12,7 +12,13 @@ get_bulk_species_links(urls, parallel = TRUE)
 \item{parallel}{Try parallel scraping [default = TRUE]}
 }
 \value{
-A data.frame with links, species, etc.
+A data.frame with variables:
+  \describe{
+    \item{Scientific_Name}{Self-explanatory}
+    \item{href}{The URL as given on the ECOS page}
+    \item{link}{The URL with domain information added}
+    \item{text}{The text representation of the URL}
+  }
 }
 \description{
 Collects all of the links (URLs) from ECOS for a set of species.

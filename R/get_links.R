@@ -1,4 +1,4 @@
-#' Gather all links for all or a subset of ECOS species
+#' Gather all links for all or a subset of species on ECOS
 #'
 #' Collects all of the links (URLs) from ECOS for a set of species.
 #'
@@ -8,7 +8,13 @@
 #'
 #' @param urls A vector of urls from ECOS to visit for link-gathering
 #' @param parallel Try parallel scraping [default = TRUE]
-#' @return A data.frame with links, species, etc.
+#' @return A data.frame with variables:
+#'   \describe{
+#'     \item{Scientific_Name}{Self-explanatory}
+#'     \item{href}{The URL as given on the ECOS page}
+#'     \item{link}{The URL with domain information added}
+#'     \item{text}{The text representation of the URL}
+#'   }
 #' @seealso \link{remove_silly_links} \link{get_species_links}
 #' @importFrom dplyr filter rbind_all
 #' @importFrom parallel mclapply
