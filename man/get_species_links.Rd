@@ -7,27 +7,25 @@
 get_species_links(url, clean = TRUE, pause = TRUE, verbose = TRUE)
 }
 \arguments{
-\item{pause}{TRUE for a 0-3 second pause to be nice to the server}
+\item{url}{The URL of a species' page on ECOS; see Example}
 
-\item{species}{Scientific name of a species, as given on ECOS}
+\item{clean}{Remove useless links (e.g., www.usa.gov) [default = TRUE]}
+
+\item{pause}{0.5-3 second pause to be nice to the server [default = TRUE]}
+
+\item{verbose}{Message the species being processed [default = TRUE]}
 }
 \value{
-A 1-row data.frame with variables:
+A data.frame with variables:
 \describe{
   \item{Scientific_Name}{The species' scientific name, as given by ECOS}
   \item{href}{The link as given on the ECOS page, if available}
   \item{link}{The link, in absolute form, if available}
-  \item{text}{The anchor text of the <a> tag, if available}}
+  \item{text}{The anchor text of the <a> tag, if available}
+}
 }
 \description{
-Return a data.frame with links and their text, from a species' page on ECOS.
-}
-\details{
-This function has a bunch of \code{try} statements because errors were 
-very common during testing, though some of that may have been because of
-slow internet connections. In a future iteration I {may, will likely} change
-the search parameter to the species code (4-char alphanum), and fetch the
-species name using the code.
+Return a data.frame with links (and their text) from a species' page on ECOS.
 }
 \examples{
 res <- get_species_url("Ursus maritimus") \%>\% get_species_links()

@@ -4,12 +4,12 @@
 \alias{get_bulk_species_links}
 \title{Gather all links for all or a subset of ECOS species}
 \usage{
-get_bulk_species_links(df, parallel = TRUE)
+get_bulk_species_links(urls, parallel = TRUE)
 }
 \arguments{
-\item{parallel}{TRUE (default) to try parallel scraping}
+\item{urls}{A vector of urls from ECOS to visit for link-gathering}
 
-\item{data}{A data.frame derived from TECP_table}
+\item{parallel}{Try parallel scraping [default = TRUE]}
 }
 \value{
 A data.frame with links, species, etc.
@@ -24,7 +24,7 @@ convenience wrapper over \link{get_species_links}.
 }
 \examples{
 \dontrun{
-  res <- get_bulk_species_links(TECP_table[1:3, ])
+  res <- get_bulk_species_links(TECP_table$Species_Page[1:3])
 }
 }
 \seealso{

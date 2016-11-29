@@ -6,8 +6,8 @@
 #' followed or, in the case of documents or tables, be downloaded. This is a
 #' convenience wrapper over \link{get_species_links}.
 #'
-#' @param data A data.frame derived from TECP_table
-#' @param parallel TRUE (default) to try parallel scraping
+#' @param urls A vector of urls from ECOS to visit for link-gathering
+#' @param parallel Try parallel scraping [default = TRUE]
 #' @return A data.frame with links, species, etc.
 #' @seealso \link{remove_silly_links} \link{get_species_links}
 #' @importFrom dplyr filter rbind_all
@@ -15,15 +15,15 @@
 #' @export
 #' @examples
 #' \dontrun{
-#'   res <- get_bulk_species_links(TECP_table[1:3, ])
+#'   res <- get_bulk_species_links(TECP_table$Species_Page[1:3])
 #' }
-get_bulk_species_links <- function(df, parallel = TRUE) {
+get_bulk_species_links <- function(urls, parallel = TRUE) {
   if(parallel) {
-    result <- try(parallel::mclapply(df$Species_Page,
+    result <- try(parallel::mclapply(urls,
                                      FUN = get_species_links,
                                      mc.cores = 3))
   } else {
-    result <- try(lapply(df$Species_Page, FUN = get_species_links))
+    result <- try(lapply(urls, FUN = get_species_links))
   }
   if(class(result[1]) != "try-error") {
     result <- dplyr::bind_rows(result)
