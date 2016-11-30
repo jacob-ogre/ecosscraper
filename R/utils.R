@@ -1,7 +1,3 @@
-#' @importFrom magrittr %>%
-#' @export
-magrittr::`%>%`
-
 # Make sure the data is loaded; required for several functions.
 check_load <- function() {
   if(!exists("TECP_table")) {
@@ -26,22 +22,21 @@ remove_silly_links <- function(df, patterns = list()) {
                     "^http://www.usa.gov", "^http://www.doi.gov",
                     "^/ecp$")
   patterns <- c(base_patt, patterns)
-  filt <- dplyr::filter(df, !is.na(href))
+  filt <- filter(df, !is.na(href))
   for(i in patterns) {
-    filt <- dplyr::filter(filt, !grepl(href, pattern = i))
+    filt <- filter(filt, !grepl(href, pattern = i))
   }
-  filt <- dplyr::distinct(filt, href, .keep_all = TRUE)
+  filt <- distinct(filt, href, .keep_all = TRUE)
   return(filt)
 }
 
 #' Get a data.frame of links and their titles from a web page
 #' 
-#' @importFrom rvest html_nodes html_attr html_text
 #' @export
-get_link_table <- function(pg) {
-  a_nodes <- rvest::html_nodes(pg, "a")
-  pg_links <- rvest::html_attr(a_nodes, "href")
-  link_txt <- rvest::html_text(a_nodes)
+get_link_df <- function(pg) {
+  a_nodes <- html_nodes(pg, "a")
+  pg_links <- html_attr(a_nodes, "href")
+  link_txt <- html_text(a_nodes)
   link_tbl <- data.frame(Doc_Link = pg_links, 
                          Title = link_txt,
                          stringsAsFactors = FALSE)

@@ -7,10 +7,6 @@
 #' @return A list of tables, named per \link{get_table_type}, and one
 #'   table (\code{scrape_info}) that records information about the scrape
 #' @seealso \link{get_table}, \link{get_table_type}
-#' 
-#' @importFrom rvest html_text html_nodes html_attr
-#' @importFrom dplyr filter
-#' @importFrom digest digest
 #' @export
 #' @examples
 #' \dontrun{
@@ -21,22 +17,23 @@ get_species_tables <- function(url, verbose = TRUE) {
   if(!exists("TECP_table")) {
     data("TECP_table")
   }
-  sp_dat <- dplyr::filter(TECP_table, Species_Page == url)
+  sp_dat <- filter(TECP_table, Species_Page == url)
   species <- unique(sp_dat$Scientific_Name)
   cur_page <- get_species_page(url, verbose = verbose)
   if(is.null(cur_page)) return(NULL)
   if(verbose) message(paste("Getting tables for", species))
-  p_tables <- rvest::html_nodes(cur_page, "table")
+  p_tables <- html_nodes(cur_page, "table")
   tab_res <- lapply(p_tables, get_table)
   if(is.null(tab_res)) return(NULL)
   
-  link_tbl <- get_link_table(cur_page)  
+  link_tbl <- get_link_df(cur_page)  
   tab_upd <- lapply(tab_res, join_for_links, links = link_tbl, sp = species)
   tab_names <- lapply(tab_upd, function(x) suppressWarnings(get_table_type(x)))
   names(tab_upd) <- unlist(tab_names)
   
   summary <- get_species_page_summary(cur_page, url, species)
   tab_upd[["scrape_info"]] <- summary
+  #TODO: remove NULL list elements...
   return(tab_upd)
 }
 
@@ -45,7 +42,6 @@ get_species_tables <- function(url, verbose = TRUE) {
 #' @param tab A table from an rvest::html_nodes object
 #' @return The table as a data.frame
 #' @seealso \link{get_tables}
-#' @importFrom rvest html_table
 get_table <- function(tab) {
   res <- try(suppressWarnings(html_table(tab, fill = TRUE)), silent = TRUE)
   if(class(res) != "try-error") {
@@ -67,11 +63,10 @@ get_table <- function(tab) {
 # @param links A data.frame with the Title of the link and the URL
 # @param species The scientific name to be included in the returned data.frame
 # @return A data.frame with URL, if tab includes a Title variable
-# @importFrom dplyr left_join
 join_for_links <- function(tab, links, species) {
   if(!is.null(tab)) {
     if("Title" %in% names(tab)) {
-      res <- dplyr::left_join(tab, links, by = "Title")
+      res <- left_join(tab, links, by = "Title")
       res$Species <- rep(species, length(res[[1]]))
       return(res)
     }
@@ -134,10 +129,9 @@ get_table_type <- function(df) {
 # @param pg An ECOS species page from \link{get_species_page}
 # @param url The url of the species page
 # @param species The scientific name of the species whose page was scraped
-# @importFrom rvest html_nodes html_attr html_text
 get_species_page_summary <- function(pg, url, species) {
-  page_txt <- rvest::html_text(pg)
-  md5_hash <- digest::digest(page_txt)
+  page_txt <- html_text(pg)
+  md5_hash <- digest(page_txt)
   tab_1 <- data.frame(Species = species,
                       Page = url, 
                       Scrape_Date = Sys.Date(), 
@@ -151,12 +145,7 @@ get_species_page_summary <- function(pg, url, species) {
 #' @param ls The list of tables from \link{get_tables}
 #' @return A data.frame of type specified by \code{table}
 #' @seealso \link{get_tables}
-#' @importFrom dplyr bind_rows
 #' @export
-#' @examples
-#' \dontrun{
-#' dplyr::distinct(bind_tables(test, "SP_TAB"))
-#' }
 bind_tables <- function(ls, table) {
   res <- lapply(names(ls), function(x) ls[[x]][[table]])
   return(dplyr::bind_rows(res))
