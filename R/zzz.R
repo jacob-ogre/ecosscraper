@@ -13,12 +13,13 @@
     encouraged to run `TECP_table <- get_TECP_table()` to refresh the data.
   ")
   
-  options("base_dir" = "~/Downloads")
-  options("TE_list" = "http://ecos.fws.gov/tess_public/reports/ad-hoc-species-report?kingdom=V&kingdom=I&kingdom=P&status=E&status=T&status=EmE&status=EmT&status=EXPE&status=EXPN&status=SAE&status=SAT&status=C&status=P&fcrithab=on&fstatus=on&fspecrule=on&finvpop=on&fgroup=on&fleadreg=on&fspcode=on&fmapstatus=on&header=Listed+Species")
-  options("ECOS_sp_prefix" = "http://ecos.fws.gov/tess_public/profile/speciesProfile.action?spcode=")
-  options("ECOS_prefix" = "http://ecos.fws.gov")
+  # options("base_dir" = "~/Downloads")
+  # options("TE_list" = "http://ecos.fws.gov/tess_public/reports/ad-hoc-species-report?kingdom=V&kingdom=I&kingdom=P&status=E&status=T&status=EmE&status=EmT&status=EXPE&status=EXPN&status=SAE&status=SAT&status=C&status=P&fcrithab=on&fstatus=on&fspecrule=on&finvpop=on&fgroup=on&fleadreg=on&fspcode=on&fmapstatus=on&header=Listed+Species")
+  # options("ECOS_sp_prefix" = "http://ecos.fws.gov/tess_public/profile/speciesProfile.action?spcode=")
+  # options("ECOS_prefix" = "http://ecos.fws.gov")
+  # 
+  # data("TECP_table")
   
-  data("TECP_table")
   # packageStartupMessage("
   #   ecosscraper is getting a fresh version of the table of threatened,
   #   endangered, candidate, and proposed species. Please wait a moment...
