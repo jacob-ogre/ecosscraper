@@ -2,11 +2,7 @@
 #'
 #' @details The data is the table returned using the URL:
 #' 
-#' \url{http://ecos.fws.gov/tess_public/reports/ad-hoc-species-report?kingdom=V&
-#' kingdom=I&kingdom=P&status=E&status=T&status=EmE&status=EmT&status=EXPE&
-#' status=EXPN&status=SAE&status=SAT&status=C&status=P&fcrithab=on&fstatus=on&
-#' fspecrule=on&finvpop=on&fgroup=on&fleadreg=on&fspcode=on&fmapstatus=on&
-#' header=Listed+Species}
+#' \url{https://goo.gl/tZRu5o}
 #' 
 #' By default, \code{ecosscraper} checks this URL \code{.onAttach} to ensure - 
 #' assuming the user restarts their sessions regularly - that the source is 

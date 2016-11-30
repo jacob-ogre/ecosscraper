@@ -193,8 +193,7 @@ get_cons_plan_links <- function(df) {
 
 #' Get a listing of link suffixes for HCPs, SHA, and CCA/As
 #'
-#' @note Does not use the ECOS conservation plan page,
-#' \url{},
+#' @note Does not use the ECOS conservation plan page
 #' because we know that many plans linked on species' ECOS pages do not 
 #' appear in the conservation plan portal.
 #' 

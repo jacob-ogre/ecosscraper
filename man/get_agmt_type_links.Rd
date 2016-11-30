@@ -26,8 +26,7 @@ A data.frame with plan type, plan name, species, and link to the plan
 Get a listing of link suffixes for HCPs, SHA, and CCA/As
 }
 \note{
-Does not use the ECOS conservation plan page,
-\url{},
+Does not use the ECOS conservation plan page
 because we know that many plans linked on species' ECOS pages do not 
 appear in the conservation plan portal.
 }
