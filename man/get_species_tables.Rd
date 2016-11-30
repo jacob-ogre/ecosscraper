@@ -4,10 +4,12 @@
 \alias{get_species_tables}
 \title{Get all tables from a species' ECOS page}
 \usage{
-get_species_tables(url)
+get_species_tables(url, verbose = TRUE)
 }
 \arguments{
 \item{url}{The path to the species' ECOS page}
+
+\item{verbose}{Print a message about tables being fetched [default = TRUE]}
 }
 \value{
 A list of tables, named per \link{get_table_type}, and one
@@ -17,7 +19,10 @@ A list of tables, named per \link{get_table_type}, and one
 Get all tables from a species' ECOS page
 }
 \examples{
-get_species_tables(TECP_domestic$Species_Page[1])
+\dontrun{
+  tabs <- get_species_tables(TECP_domestic$Species_Page[1])
+  tab2 <- get_species_url("Abies guatemalensis") \%>\% get_species_tables()
+}
 }
 \seealso{
 \link{get_table}, \link{get_table_type}

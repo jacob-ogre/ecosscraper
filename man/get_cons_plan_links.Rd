@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_links.R
 \name{get_cons_plan_links}
 \alias{get_cons_plan_links}
-\title{Get the links to conservation plan pages.}
+\title{Get the links to conservation plan pages on ECOS species' pages}
 \usage{
 get_cons_plan_links(df)
 }
@@ -13,9 +13,13 @@ get_cons_plan_links(df)
 df, filtered for links to conservation plans (SHA, HCP, CCAA)
 }
 \description{
-Get the links to conservation plan pages.
+Get the links to conservation plan pages on ECOS species' pages
 }
 \examples{
-# get_cons_plan_links(all_links)
+\dontrun{
+  get_species_url("Gila purpurea") \%>\% 
+    get_species_links() \%>\% 
+    get_cons_plan_links()
+}
 }
 

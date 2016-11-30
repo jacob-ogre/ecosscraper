@@ -18,7 +18,9 @@ Imports:
     digest,
     dplyr,
     httr,
-    plotly,
+    magrittr,
     rvest,
     stringr,
-    viridis
+    xml2
+Remotes:
+    Defenders-ESC/pdfdown

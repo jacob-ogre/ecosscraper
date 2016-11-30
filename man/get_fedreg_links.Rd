@@ -2,20 +2,22 @@
 % Please edit documentation in R/get_links.R
 \name{get_fedreg_links}
 \alias{get_fedreg_links}
-\title{Get the links for Federal Register documents.}
+\title{Get the links for Federal Register documents on ECOS species' pages}
 \usage{
 get_fedreg_links(df)
 }
 \arguments{
-\item{df}{A data.frame of species' links.}
+\item{df}{A data.frame of links from \link{get_species_links}}
 }
 \value{
 df, filtered for only Fed. Reg. links
 }
 \description{
-For when we want to just get the Fed. Reg. documents.
+Get the links for Federal Register documents on ECOS species' pages
 }
 \examples{
-# get_fedreg_links(all_links)
+  fed_reg <- get_species_url("Gila purpurea") \%>\% 
+               get_species_links() \%>\%
+               get_fedreg_links()
 }
 

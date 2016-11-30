@@ -16,8 +16,6 @@
 #'     \item{text}{The text representation of the URL}
 #'   }
 #' @seealso \link{remove_silly_links} \link{get_species_links}
-#' @importFrom dplyr filter rbind_all
-#' @importFrom parallel mclapply
 #' @export
 #' @examples
 #' \dontrun{
@@ -25,24 +23,26 @@
 #' }
 get_bulk_species_links <- function(urls, parallel = TRUE) {
   if(parallel) {
-    result <- try(parallel::mclapply(urls,
-                                     FUN = get_species_links,
-                                     mc.cores = 3))
+    result <- try(mclapply(urls,
+                           FUN = get_species_links,
+                           mc.cores = 3))
   } else {
     result <- try(lapply(urls, FUN = get_species_links))
   }
   if(class(result[1]) != "try-error") {
-    result <- dplyr::bind_rows(result)
+    result <- bind_rows(result)
     return(result)
   }
-  stop("A scraping error occurred. Please check the traceback, if present.")
+  stop("A scraping error occurred. Please check the traceback, if available.")
 }
 
 #' Return all links on a species' ECOS page
 #'
-#' Return a data.frame with links (and their text) from a species' page on ECOS.
+#' Return a data.frame with links (and anchor text) from a species' ECOS page.
 #' 
-#' @param url The URL of a species' page on ECOS; see Example
+#' @note Either \code{url} or \code{page} must be specified.
+#' 
+#' @param url The URL of a species' page on ECOS [default = NULL]
 #' @param clean Remove useless links (e.g., www.usa.gov) [default = TRUE]
 #' @param pause 0.5-3 second pause to be nice to the server [default = TRUE]
 #' @param verbose Message the species being processed [default = TRUE]
@@ -54,27 +54,22 @@ get_bulk_species_links <- function(urls, parallel = TRUE) {
 #'   \item{text}{The anchor text of the <a> tag, if available}
 #' }
 #' @seealso \link{remove_silly_links} \link{get_bulk_species_links}
-#' @importFrom rvest html_nodes html_attr
 #' @export
 #' @examples
-#' res <- get_species_url("Ursus maritimus") %>% get_species_links()
-#' head(res)
+#' \dontrun{
+#'   res <- get_species_url("Gila purpurea") %>% get_species_links()
+#'   head(res)
+#' }
 get_species_links <- function(url, clean = TRUE, pause = TRUE, verbose = TRUE) {
-  if(!exists("TECP_table")) {
-    data("TECP_table")
-  }
-  record <- dplyr::filter(TECP_table, Species_Page == url)
+  check_load()
+  record <- filter(TECP_table, Species_Page == url)
   species <- unique(record$Scientific_Name)
-
-  if(pause == TRUE) Sys.sleep(runif(1, 0, 3))
   if(verbose) message(paste("Fetching page for", species))
-  page <- get_species_page(record$Species_Page)
-  if(is.null(page)) {
-    err_res("Error getting page for", species)
-  }
-  a_nodes <- try(rvest::html_nodes(page, "a"))
+  if(pause) Sys.sleep(runif(1, 0, 3))
+  page <- get_species_page(url)
+  a_nodes <- try(html_nodes(page, "a"))
   if(class(a_nodes) == "try-error") err_res("No <a> nodes for", species)
-  hrefs <- rvest::html_attr(a_nodes, "href")
+  hrefs <- html_attr(a_nodes, "href")
   base_ln <- dirname(url)
   full_ln <- simplify2array(lapply(hrefs, FUN = fill_link, base_ln))
   texts <- html_text(a_nodes)
@@ -95,12 +90,10 @@ get_species_links <- function(url, clean = TRUE, pause = TRUE, verbose = TRUE) {
 #' @importFrom dplyr filter
 #' @export
 #' @examples
-#' get_species_url("Ursus arctos horribilis")
+#' get_species_url("Gila purpurea")
 get_species_url <- function(species) {
-  if(!exists("TECP_table")) {
-    data("TECP_table")
-  }
-  record <- dplyr::filter(TECP_table, Scientific_Name == species)
+  check_load()
+  record <- filter(TECP_table, Scientific_Name == species)
   n_hits <- length(unique(record$Species_Page))
   if(n_hits == 1) {
     return(record$Species_Page[1])
@@ -111,50 +104,15 @@ get_species_url <- function(species) {
   }
 }
 
-# Warning with a data.frame return
+# Warning with a data.frame return for bad get_species_links
 err_res <- function(e, species) {
   warning(paste("Warning:", e, species))
   err_res <- data.frame(Scientific_Name = species,
-                      href = "No page",
-                      link = "No page",
-                      text = "No page",
-                      stringsAsFactors = FALSE)
+                        href = "No page",
+                        link = "No page",
+                        text = "No page",
+                        stringsAsFactors = FALSE)
   return(err_res)
-}
-
-# Return the ECOS species profile for a given species
-#
-# Each species in ECOS has its own profile page, which can be scraped; this
-# simply returns the profile page.
-#
-# There are several \code{try} statements because of the persnickettiness of
-# ECOS and/or to guard against bad species names. Most errors are caught by
-# \link{get_species_url}.
-# @param url The url for a species' ECOS profile
-# @return A page returned by \code{rvest::read_html}
-# @examples
-# \dontrun{
-#   page <- get_species_url("Abies guatemalensis") %>% get_species_page()
-# }
-get_species_page <- function(url) {
-  url <- URLencode(url)
-  if(!httr::http_error(url)) {
-    page <- try(xml2::read_html(url))
-    if(class(page[1]) != "try-error") {
-      if(is_species_profile(page)) {
-        return(page)
-      } else {
-        warning(paste(url, "not a link to a species profile"))
-        return(NULL)
-      }
-    } else {
-      warning(paste("Error reading", url))
-      return(NULL)
-    }
-  } else {
-    warning(paste("http_error for", url))
-    return(NULL)
-  }
 }
 
 # Fill relative links with appropriate prefix
@@ -171,7 +129,7 @@ fill_link <- function(x, base_ln) {
   return(x)
 }
 
-# Check if the requested page is an ECOS profile page.
+# Check if the requested page is an ECOS profile page
 #
 # ECOS will return a page rather than 404 if the species code is wrong. This
 # checks that the page is not the "No species profile" page.
@@ -180,7 +138,7 @@ fill_link <- function(x, base_ln) {
 # @return logical; TRUE if a species profile, FALSE if "No species profile"
 # @importFrom rvest html_text html_node
 # @examples
-# get_species_url("Ursus arctos horribilis") %>%
+# get_species_url("Gila purpurea") %>%
 #   get_species_page() %>%
 #   is_species_profile()
 is_species_profile <- function(page) {
@@ -199,7 +157,7 @@ is_species_profile <- function(page) {
 #' @export
 #' @examples
 #' \dontrun{
-#'   five_yr <- get_species_url("Ursus arctos horribilis") %>% 
+#'   five_yr <- get_species_url("Gila purpurea") %>% 
 #'                get_species_links() %>%
 #'                get_5yrev_links()
 #' }
@@ -215,7 +173,7 @@ get_5yrev_links <- function(df) {
 #' @importFrom dplyr filter
 #' @export
 #' @examples
-#'   recovery <- get_species_url("Ursus arctos horribilis") %>% 
+#'   recovery <- get_species_url("Gila purpurea") %>% 
 #'                 get_species_links() %>%
 #'                 get_recovery_links()
 get_recovery_links <- function(df) {
@@ -230,7 +188,7 @@ get_recovery_links <- function(df) {
 #' @importFrom dplyr filter
 #' @export
 #' @examples
-#'   fed_reg <- get_species_url("Ursus arctos horribilis") %>% 
+#'   fed_reg <- get_species_url("Gila purpurea") %>% 
 #'                get_species_links() %>%
 #'                get_fedreg_links()
 get_fedreg_links <- function(df) {
@@ -245,52 +203,65 @@ get_fedreg_links <- function(df) {
 #' @importFrom dplyr filter
 #' @export
 #' @examples
-#' # get_cons_plan_links(all_links)
+#' \dontrun{
+#'   get_species_url("Gila purpurea") %>% 
+#'     get_species_links() %>% 
+#'     get_cons_plan_links()
+#' }
 get_cons_plan_links <- function(df) {
-  res <- dplyr::filter(df, grepl(href, pattern = "conservationPlan"))
+  res <- filter(df, grepl(href, pattern = "conservationPlan"))
   return(res)
 }
 
-#' Get a listing of link suffixes for HCPs, SHA, and CCA/As.
+#' Get a listing of link suffixes for HCPs, SHA, and CCA/As
 #'
-#' Uses the ECOS conservation plan page as the root and selects from dropdown.
+#' @note Does not use the ECOS conservation plan page,
+#' \url{},
+#' because we know that many plans linked on species' ECOS pages do not 
+#' appear in the conservation plan portal.
 #' 
-#' THIS FUNCTION SHOULD BE DEPRECATED BECAUSE WE KNOW THE TESS CONSERVATION PLAN
-#' PORTAL IS MISSING PLANS THAT ARE LINKED ON SPECIES' PAGES.
-#'
-#' @return A data.frame with region, type, and suffix
-#' @importFrom rvest html_nodes html_attr
-#' @importFrom xml2 read_html
+#' @param url The species' ECOS page URL to scrape
+#' @param type The type of conservation agreement to search for; one of
+#'   \itemize{
+#'     \item{HCP}
+#'     \item{SHA}
+#'     \item{CCA}
+#'     \item{CCAA}
+#'   }
+#' @param verbose Print messages while processing [default = TRUE]
+#' @return A data.frame with plan type, plan name, species, and link to the plan
 #' @export
 #' @examples
 #' \dontrun{
-#'   agmt <- get_agreement_links()
+#' agmt <- get_species_url("Gila purpurea") %>%
+#'           get_agmt_type_links(type = "HCP")
 #' }
-get_agreement_links <- function() {
-  regions <- seq(1, 9)
-  types <- c("HCP", "SHA", "CCA", "CCAA")
-  base <- "http://ecos.fws.gov/tess_public/conservationPlan/region?region="
-  suff <- "&type="
-  region <- c()
-  type <- c()
-  suffix <- c()
-  for(i in regions) {
-    for(j in types) {
-      pg <- paste0(base, i, suff, j)
-      page <- try(xml2::read_html(URLencode(pg)))
-      if(class(page[1]) == "list") {
-        form <- try(rvest::html_nodes(page, "select option"))
-        pgln <- try(rvest::html_attr(form, "value"))
-        region <- c(region, rep(i, length(pgln)))
-        type <- c(type, rep(j, length(pgln)))
-        suffix <- c(suffix, pgln)
-      }
-    }
+get_agmt_type_links <- function(url, type, verbose = TRUE) {
+  check_load()
+  species <- unique(filter(TECP_table, 
+                    Species_Page == url)$Scientific_Name)
+  tabs <- get_species_tables(url, verbose = FALSE)
+  if(type == "HCP") {
+    cur_tab <- tabs[["HCP Plan Summaries"]]
+  } else if(type == "SHA") {
+    cur_tab <- tabs[["SHA Plan Summaries"]]
+  } else if(type == "CCA") {
+    cur_tab <- tabs[["CCA Plan Summaries"]]
+  } else if(type == "CCAA") {
+    cur_tab <- tabs[["CCAA Plan Summaries"]]
+  } else {
+    message("Please specify a type of HCP, SHA, CCA, or CCAA")
+    cur_tab <- NULL
   }
-  res <- data.frame(region = region, type = type, suffix = suffix)
-  res$dups <- duplicated(res$suffix)
-  res <- res[res$dups == FALSE, ]
-  res <- subset(res, select=-dups)
+  if(is.null(cur_tab)) {
+    message(sprintf("No plans of type %s for %s", type, species))
+    return(NULL)
+  }
+  link <- get_species_links(url, verbose = verbose)
+  names(cur_tab)[1] <- "text"
+  join <- left_join(cur_tab, link, by = "text")
+  join$Type <- rep(type, length(join[[1]]))
+  res <- select_(join, "Type", "Plan" = "text", "Scientific_Name", 
+                 "Link" = "link")
   return(res)
 }
-

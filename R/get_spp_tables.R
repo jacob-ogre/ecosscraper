@@ -3,6 +3,7 @@
 #' Get all tables from a species' ECOS page
 #'
 #' @param url The path to the species' ECOS page
+#' @param verbose Print a message about tables being fetched [default = TRUE]
 #' @return A list of tables, named per \link{get_table_type}, and one
 #'   table (\code{scrape_info}) that records information about the scrape
 #' @seealso \link{get_table}, \link{get_table_type}
@@ -12,15 +13,19 @@
 #' @importFrom digest digest
 #' @export
 #' @examples
-#' get_species_tables(TECP_domestic$Species_Page[1])
-get_species_tables <- function(url) {
+#' \dontrun{
+#'   tabs <- get_species_tables(TECP_domestic$Species_Page[1])
+#'   tab2 <- get_species_url("Abies guatemalensis") %>% get_species_tables()
+#' }
+get_species_tables <- function(url, verbose = TRUE) {
   if(!exists("TECP_table")) {
     data("TECP_table")
   }
   sp_dat <- dplyr::filter(TECP_table, Species_Page == url)
   species <- unique(sp_dat$Scientific_Name)
-  cur_page <- get_species_page(url)
+  cur_page <- get_species_page(url, verbose = verbose)
   if(is.null(cur_page)) return(NULL)
+  if(verbose) message(paste("Getting tables for", species))
   p_tables <- rvest::html_nodes(cur_page, "table")
   tab_res <- lapply(p_tables, get_table)
   if(is.null(tab_res)) return(NULL)

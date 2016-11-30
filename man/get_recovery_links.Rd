@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_links.R
 \name{get_recovery_links}
 \alias{get_recovery_links}
-\title{Get the links for recovery plans.}
+\title{Get the links for recovery plans on ECOS species' pages}
 \usage{
 get_recovery_links(df)
 }
@@ -13,9 +13,11 @@ get_recovery_links(df)
 df, filtered for only recovery plan links
 }
 \description{
-For when we want to just get the recovery plans.
+Get the links for recovery plans on ECOS species' pages
 }
 \examples{
-# get_recovery_links(all_links)
+  recovery <- get_species_url("Gila purpurea") \%>\% 
+                get_species_links() \%>\%
+                get_recovery_links()
 }
 

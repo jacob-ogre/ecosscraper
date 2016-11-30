@@ -7,7 +7,7 @@
 get_species_links(url, clean = TRUE, pause = TRUE, verbose = TRUE)
 }
 \arguments{
-\item{url}{The URL of a species' page on ECOS; see Example}
+\item{url}{The URL of a species' page on ECOS [default = NULL]}
 
 \item{clean}{Remove useless links (e.g., www.usa.gov) [default = TRUE]}
 
@@ -25,11 +25,16 @@ A data.frame with variables:
 }
 }
 \description{
-Return a data.frame with links (and their text) from a species' page on ECOS.
+Return a data.frame with links (and anchor text) from a species' ECOS page.
+}
+\note{
+Either \code{url} or \code{page} must be specified.
 }
 \examples{
-res <- get_species_url("Ursus maritimus") \%>\% get_species_links()
-head(res)
+\dontrun{
+  res <- get_species_url("Gila purpurea") \%>\% get_species_links()
+  head(res)
+}
 }
 \seealso{
 \link{remove_silly_links} \link{get_bulk_species_links}

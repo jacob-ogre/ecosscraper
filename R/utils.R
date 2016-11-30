@@ -1,3 +1,14 @@
+#' @importFrom magrittr %>%
+#' @export
+magrittr::`%>%`
+
+# Make sure the data is loaded; required for several functions.
+check_load <- function() {
+  if(!exists("TECP_table")) {
+    data("TECP_table")
+  }
+}
+
 #' Remove useless links from ECOS-scraped webpage.
 #'
 #' Expects a data.frame with an href variable for filtering. The default 
@@ -13,13 +24,13 @@
 remove_silly_links <- function(df, patterns = list()) {
   base_patt <- list("^#", "^javascript", "^http://www.fws.gov", 
                     "^http://www.usa.gov", "^http://www.doi.gov",
-                    "^/ecp")
+                    "^/ecp$")
   patterns <- c(base_patt, patterns)
   filt <- dplyr::filter(df, !is.na(href))
   for(i in patterns) {
     filt <- dplyr::filter(filt, !grepl(href, pattern = i))
   }
-  filt <- dplyr::distinct(filt)
+  filt <- dplyr::distinct(filt, href, .keep_all = TRUE)
   return(filt)
 }
 
