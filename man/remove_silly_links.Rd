@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{remove_silly_links}
 \alias{remove_silly_links}
-\title{Remove useless links from ECOS-scraped webpage.}
+\title{Remove useless links from ECOS-scraped webpage}
 \usage{
 remove_silly_links(df, patterns = list())
 }

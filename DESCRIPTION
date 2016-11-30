@@ -2,7 +2,8 @@ Package: ecosscraper
 Type: Package
 Title: Scrape the ECOS Website, http://ecos.fws.gov
 Version: 0.2.0
-Author: Jacob Malcom
+Authors@R: person("Jacob", "Malcom", email = "jmalcom@defenders.org",
+                  role = c("aut", "cre"))
 Maintainer: Jacob Malcom <jmalcom@defenders.org>
 Description: The U.S. Fish and Wildlife Service's ECOS website contains a
     significant amount of information about species listed as threatened or

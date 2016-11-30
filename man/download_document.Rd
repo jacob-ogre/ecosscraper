@@ -17,7 +17,7 @@ download_document(url, subd, pause = TRUE)
 A data.frame with destination and success
 }
 \description{
-Simple function to download a file from ECOS.
+Simple function to download a file from ECOS
 }
 \details{
 This is a very thin wrapper for \link[pdfdown]{download_pdf}. Keeping

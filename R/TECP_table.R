@@ -29,10 +29,10 @@
 #' TECP_table <- get_TECP_table()
 #' head(TECP_table)
 get_TECP_table <- function() {
-  if(!httr::http_error(options()$TE_list)) {
-    page <- xml2::read_html(options()$TE_list)
-    tabl <- rvest::html_nodes(page, "table")
-    all_spp <- as.data.frame(rvest::html_table(tabl))
+  if(!http_error(options()$TE_list)) {
+    page <- read_html(options()$TE_list)
+    tabl <- html_nodes(page, "table")
+    all_spp <- as.data.frame(html_table(tabl))
     names(all_spp) <- gsub(x = names(all_spp), 
                            pattern = ".", 
                            replacement = "_",

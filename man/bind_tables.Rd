@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_tables.R
 \name{bind_tables}
 \alias{bind_tables}
-\title{Extract named tables from a list of tables extracted for species}
+\title{Extract named tables from a list of tables extracted for >1 species}
 \usage{
 bind_tables(ls, table)
 }
@@ -13,7 +13,7 @@ bind_tables(ls, table)
 A data.frame of type specified by \code{table}
 }
 \description{
-Extract named tables from a list of tables extracted for species
+Extract named tables from a list of tables extracted for >1 species
 }
 \seealso{
 \link{get_tables}
