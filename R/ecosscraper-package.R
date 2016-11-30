@@ -11,6 +11,7 @@
 #' @importFrom httr http_error
 #' @importFrom magrittr %>%
 #' @importFrom parallel mclapply
+#' @importFrom pdfdown download_pdf
 #' @importFrom rvest html_attr html_node html_nodes html_table html_text
 #' @importFrom xml2 read_html
 #' @docType package

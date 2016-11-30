@@ -1,6 +1,6 @@
 #' GET a document from ECOS.
 #'
-#' Simple function to download a file from ECOS.
+#' Simple function to download a file from ECOS
 #' 
 #' @details This is a very thin wrapper for \link[pdfdown]{download_pdf}. Keeping
 #' the function here just in case removal would break something else.
@@ -13,7 +13,6 @@
 #' @param subd Subdirectory to which the document will be downloaded
 #' @param pause Whether to pause for 0.5-3 seconds during scraping
 #' @return A data.frame with destination and success 
-#' @importFrom pdfdown download_pdf
 #' @seealso \link[pdfdown]{download_pdf}
 #' @export
 #' @examples

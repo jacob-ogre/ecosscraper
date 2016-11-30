@@ -140,7 +140,7 @@ get_species_page_summary <- function(pg, url, species) {
   return(tab_1)
 }
   
-#' Extract named tables from a list of tables extracted for species
+#' Extract named tables from a list of tables extracted for >1 species
 #'
 #' @param ls The list of tables from \link{get_tables}
 #' @return A data.frame of type specified by \code{table}

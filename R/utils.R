@@ -5,7 +5,29 @@ check_load <- function() {
   }
 }
 
-#' Remove useless links from ECOS-scraped webpage.
+#' Return the profile page on ECOS for a given species
+#'
+#' @param df A data.frame returned from get_TECP_table
+#' @param species The scientific name of a species, as given by ECOS
+#' @return The URL of the species' ECOS profile
+#' @importFrom dplyr filter
+#' @export
+#' @examples
+#' get_species_url("Gila purpurea")
+get_species_url <- function(species) {
+  check_load()
+  record <- filter(TECP_table, Scientific_Name == species)
+  n_hits <- length(unique(record$Species_Page))
+  if(n_hits == 1) {
+    return(record$Species_Page[1])
+  } else if(n_hits > 1) {
+    stop(paste("Multiple matches for", species, "in lookup"))
+  } else {
+    stop(paste(species, "not found in lookup"))
+  }
+}
+
+#' Remove useless links from ECOS-scraped webpage
 #'
 #' Expects a data.frame with an href variable for filtering. The default 
 #' patterns are based on an examination of unfiltered link tables from ECOS
