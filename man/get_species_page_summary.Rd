@@ -4,16 +4,26 @@
 \alias{get_species_page_summary}
 \title{Get a summary data.frame of an ECOS page scrape}
 \usage{
-get_species_page_summary(pg, url, species)
+get_species_page_summary(url, species, pause = TRUE, pg = NULL)
 }
 \arguments{
-\item{pg}{An ECOS species page from \link{get_species_page}}
-
 \item{url}{The url of the species page}
 
-\item{species}{The scientific name of the species whose page was scraped}
+\item{species}{The scientific name of the species}
+
+\item{pause}{Pause for 0.5-3s during scraping [default = TRUE]}
+
+\item{pg}{An ECOS species page from \link{get_species_page}}
 }
 \description{
-Get a summary data.frame of an ECOS page scrape
+By default, \code{get_species_page_summary} will fetch the species' ECOS page
+given the URL, but there may be times when the page has already been fetched.
+In those cases, the page can be specified to save time.
+}
+\note{
+Apparently, FWS does not serve the same version of a species' page up
+twice in a row. Instead, the same information will be presented in different
+orders. We have to use \code{strsplit} along with \link[stringr]{str_trim} to
+get clean lines, then sort before doing the MD5 hash.
 }
 

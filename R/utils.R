@@ -74,17 +74,33 @@ set_TE_list_opt <- function(url) {
 }
 
 #' Get a summary data.frame of an ECOS page scrape
-#' 
-#' @param pg An ECOS species page from \link{get_species_page}
+#'
+#' By default, \code{get_species_page_summary} will fetch the species' ECOS page
+#' given the URL, but there may be times when the page has already been fetched.
+#' In those cases, the page can be specified to save time.
+#'
+#' @note Apparently, FWS does not serve the same version of a species' page up
+#' twice in a row. Instead, the same information will be presented in different
+#' orders. We have to use \code{strsplit} along with \link[stringr]{str_trim} to
+#' get clean lines, then sort before doing the MD5 hash.
+#'
 #' @param url The url of the species page
-#' @param species The scientific name of the species whose page was scraped
+#' @param species The scientific name of the species
+#' @param pg An ECOS species page from \link{get_species_page}
+#' @param pause Pause for 0.5-3s during scraping [default = TRUE]
 #' @export
-get_species_page_summary <- function(pg, url, species) {
+get_species_page_summary <- function(url, species, pause = TRUE, pg = NULL) {
+  if(is.null(pg)) {
+    pg <- get_species_page(url)
+  }
   page_txt <- html_text(pg)
+  page_txt <- unlist(strsplit(page_txt, split = "\n"))
+  page_txt <- unlist(stringr::str_trim(page_txt))
+  page_txt <- sort(page_txt)
   md5_hash <- digest(page_txt)
   tab_1 <- data.frame(Species = species,
-                      Page = url, 
-                      Scrape_Date = Sys.Date(), 
+                      Page = url,
+                      Scrape_Date = Sys.Date(),
                       Page_Text_MD5 = md5_hash,
                       stringsAsFactors = FALSE)
   return(tab_1)

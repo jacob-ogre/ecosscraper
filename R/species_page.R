@@ -11,6 +11,7 @@
 #' @param url The url for a species' ECOS profile
 #' @param verbose Whether message that the page is being fetched [default = FALSE]
 #' @return A page returned by \code{rvest::read_html}
+#' @export
 #' @examples
 #' \dontrun{
 #'   page <- get_species_url("Abies guatemalensis") %>% get_species_page()
