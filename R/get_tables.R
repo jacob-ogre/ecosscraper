@@ -123,22 +123,6 @@ get_table_type <- function(df) {
     return(names(df)[1])
   }
 }
-
-# Get a summary data.frame of an ECOS page scrape
-# 
-# @param pg An ECOS species page from \link{get_species_page}
-# @param url The url of the species page
-# @param species The scientific name of the species whose page was scraped
-get_species_page_summary <- function(pg, url, species) {
-  page_txt <- html_text(pg)
-  md5_hash <- digest(page_txt)
-  tab_1 <- data.frame(Species = species,
-                      Page = url, 
-                      Scrape_Date = Sys.Date(), 
-                      Page_Text_MD5 = md5_hash,
-                      stringsAsFactors = FALSE)
-  return(tab_1)
-}
   
 #' Extract named tables from a list of tables extracted for >1 species
 #'
