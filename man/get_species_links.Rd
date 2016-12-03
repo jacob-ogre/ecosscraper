@@ -7,7 +7,7 @@
 get_species_links(url, clean = TRUE, pause = TRUE, verbose = TRUE)
 }
 \arguments{
-\item{url}{The URL of a species' page on ECOS [default = NULL]}
+\item{url}{The URL of a species' page on ECOS or path to the HTML file}
 
 \item{clean}{Remove useless links (e.g., www.usa.gov) [default = TRUE]}
 

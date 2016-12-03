@@ -42,7 +42,7 @@ get_bulk_species_links <- function(urls, parallel = TRUE) {
 #' 
 #' @note Either \code{url} or \code{page} must be specified.
 #' 
-#' @param url The URL of a species' page on ECOS [default = NULL]
+#' @param url The URL of a species' page on ECOS or path to the HTML file
 #' @param clean Remove useless links (e.g., www.usa.gov) [default = TRUE]
 #' @param pause 0.5-3 second pause to be nice to the server [default = TRUE]
 #' @param verbose Message the species being processed [default = TRUE]
@@ -61,12 +61,18 @@ get_bulk_species_links <- function(urls, parallel = TRUE) {
 #'   head(res)
 #' }
 get_species_links <- function(url, clean = TRUE, pause = TRUE, verbose = TRUE) {
+  if(grepl(url, pattern = "^http|^www")) {
+    if(verbose) message(paste("Fetching page for", species))
+    if(pause) Sys.sleep(runif(1, 0, 3))
+    page <- get_species_page(url)
+    record <- filter(TECP_table, Species_Page == url)
+  } else {
+    page <- xml2::read_html(url)
+    sp_code <- strsplit(basename(url), split = "_")[[1]][1]
+    record <- filter(TECP_table, Species_Code == sp_code)
+  }
   check_load()
-  record <- filter(TECP_table, Species_Page == url)
   species <- unique(record$Scientific_Name)
-  if(verbose) message(paste("Fetching page for", species))
-  if(pause) Sys.sleep(runif(1, 0, 3))
-  page <- get_species_page(url)
   a_nodes <- try(html_nodes(page, "a"))
   if(class(a_nodes) == "try-error") err_res("No <a> nodes for", species)
   hrefs <- html_attr(a_nodes, "href")
