@@ -14,13 +14,18 @@
 #'   tab2 <- get_species_url("Abies guatemalensis") %>% get_species_tables()
 #' }
 get_species_tables <- function(url, verbose = TRUE) {
-  if(!exists("TECP_table")) {
-    data("TECP_table")
+  check_load()
+  if(grepl(url, pattern = "^http|^www")) {
+    sp_dat <- filter(TECP_table, Species_Page == url)
+    species <- unique(sp_dat$Scientific_Name)
+    cur_page <- get_species_page(url, verbose = verbose)
+    if(is.null(cur_page)) return(NULL)
+  } else {
+    sp_code <- strsplit(basename(url), split = "_")[[1]][1]
+    sp_dat <- filter(TECP_table, Species_Code == sp_code)
+    species <- unique(sp_dat$Scientific_Name)
+    cur_page <- xml2::read_html(url)
   }
-  sp_dat <- filter(TECP_table, Species_Page == url)
-  species <- unique(sp_dat$Scientific_Name)
-  cur_page <- get_species_page(url, verbose = verbose)
-  if(is.null(cur_page)) return(NULL)
   if(verbose) message(paste("Getting tables for", species))
   p_tables <- html_nodes(cur_page, "table")
   tab_res <- lapply(p_tables, get_table)
@@ -31,8 +36,8 @@ get_species_tables <- function(url, verbose = TRUE) {
   tab_names <- lapply(tab_upd, function(x) suppressWarnings(get_table_type(x)))
   names(tab_upd) <- unlist(tab_names)
   
-  summary <- get_species_page_summary(cur_page, url, species)
-  tab_upd[["scrape_info"]] <- summary
+  # summary <- get_species_page_summary(cur_page, url, species)
+  # tab_upd[["scrape_info"]] <- summary
   #TODO: remove NULL list elements...
   return(tab_upd)
 }

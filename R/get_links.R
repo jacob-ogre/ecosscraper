@@ -82,7 +82,7 @@ get_species_links <- function(url, clean = TRUE, pause = TRUE, verbose = TRUE) {
   res <- data.frame(Scientific_Name = rep(species, length(hrefs)),
                     href = hrefs,
                     link = full_ln,
-                    text = texts,
+                    text = str_trim(texts),
                     stringsAsFactors = FALSE)
   if(clean) res <- remove_silly_links(res)
   return(res)
@@ -199,11 +199,11 @@ get_cons_plan_links <- function(df) {
 
 #' Get a listing of link suffixes for HCPs, SHA, and CCA/As
 #'
-#' @note Does not use the ECOS conservation plan page
-#' because we know that many plans linked on species' ECOS pages do not 
-#' appear in the conservation plan portal.
+#' @note Does not use the ECOS conservation plan page because we know that many 
+#' plans linked on species' ECOS pages do not appear in the conservation plan 
+#' portal.
 #' 
-#' @param url The species' ECOS page URL to scrape
+#' @param url The species' ECOS page URL to scrape *OR* path to HTML of page
 #' @param type The type of conservation agreement to search for; one of
 #'   \itemize{
 #'     \item{HCP}
@@ -221,8 +221,14 @@ get_cons_plan_links <- function(df) {
 #' }
 get_agmt_type_links <- function(url, type, verbose = TRUE) {
   check_load()
-  species <- unique(filter(TECP_table, 
-                    Species_Page == url)$Scientific_Name)
+  if(grepl(url, pattern = "^http|^www")) {
+    species <- unique(filter(TECP_table, 
+                      Species_Page == url)$Scientific_Name)
+  } else {
+    sp_code <- strsplit(basename(url), split = "_")[[1]][1]
+    species <- unique(filter(TECP_table, 
+                      Species_Code == sp_code)$Scientific_Name)
+  }
   tabs <- get_species_tables(url, verbose = FALSE)
   if(type == "HCP") {
     cur_tab <- tabs[["HCP Plan Summaries"]]
@@ -234,7 +240,7 @@ get_agmt_type_links <- function(url, type, verbose = TRUE) {
     cur_tab <- tabs[["CCAA Plan Summaries"]]
   } else {
     message("Please specify a type of HCP, SHA, CCA, or CCAA")
-    cur_tab <- NULL
+    return(NULL)
   }
   if(is.null(cur_tab)) {
     message(sprintf("No plans of type %s for %s", type, species))

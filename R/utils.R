@@ -60,7 +60,7 @@ get_link_df <- function(pg) {
   pg_links <- html_attr(a_nodes, "href")
   link_txt <- html_text(a_nodes)
   link_tbl <- data.frame(Doc_Link = pg_links, 
-                         Title = link_txt,
+                         Title = str_trim(link_txt),
                          stringsAsFactors = FALSE)
   return(link_tbl)
 } 
@@ -89,13 +89,15 @@ set_TE_list_opt <- function(url) {
 #' @param pg An ECOS species page from \link{get_species_page}
 #' @param pause Pause for 0.5-3s during scraping [default = TRUE]
 #' @export
-get_species_page_summary <- function(url, species, pause = TRUE, pg = NULL) {
-  if(is.null(pg)) {
+get_species_page_summary <- function(url, species, pause = TRUE) {
+  if(grepl(url, pattern = "^http|^www")) {
     pg <- get_species_page(url)
+  } else {
+    pg <- xml2::read_html(url)
   }
   page_txt <- html_text(pg)
   page_txt <- unlist(strsplit(page_txt, split = "\n"))
-  page_txt <- unlist(stringr::str_trim(page_txt))
+  page_txt <- unlist(str_trim(page_txt))
   page_txt <- sort(page_txt)
   md5_hash <- digest(page_txt)
   tab_1 <- data.frame(Species = species,

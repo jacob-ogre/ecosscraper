@@ -4,7 +4,7 @@
 \alias{get_species_page_summary}
 \title{Get a summary data.frame of an ECOS page scrape}
 \usage{
-get_species_page_summary(url, species, pause = TRUE, pg = NULL)
+get_species_page_summary(url, species, pause = TRUE)
 }
 \arguments{
 \item{url}{The url of the species page}
