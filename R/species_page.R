@@ -53,14 +53,14 @@ get_species_page <- function(url, verbose = FALSE) {
 #'
 #' @param url The URL of the species' ECOS page
 #' @param file The path to which the HTML will be written
+#' @return The status of the phantomjs scrape (1 or 0) or NULL if an HTTP error
 #' @export
 #' @examples
 #' \dontrun{
 #'    An example, not run
 #' }
 get_ECOS_page <- function(url = NULL, file = NULL, wait = TRUE) {
-  if(is.null(url)) stop("URL is missing.")
-  if(is.null(file)) stop("'File' is missing.")
+  if(is.null(url) | is.null(file)) stop("Both url and file are required.")
   
   url <- URLencode(url)
   if(!http_error(url)) {
@@ -76,9 +76,12 @@ get_ECOS_page <- function(url = NULL, file = NULL, wait = TRUE) {
     
     if(is.null(res)) return(NULL)
     
-    if(res != 0) stop(paste("phanton returned error", res))
+    if(res != 0) {
+      message(paste("phantomjs returned error", res))
+      return(res)
+    }
     
-    return(file)
+    return(res)
   } else {
     message(paste("HTTP error for", url))
     return(NULL)

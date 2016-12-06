@@ -11,6 +11,9 @@ get_ECOS_page(url = NULL, file = NULL, wait = TRUE)
 
 \item{file}{The path to which the HTML will be written}
 }
+\value{
+The status of the phantomjs scrape (1 or 0) or NULL if an HTTP error
+}
 \description{
 Use phantomjs to get a page from ECOS
 }

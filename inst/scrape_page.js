@@ -27,12 +27,16 @@ if (args.length < 2) {
   phantom.exit(1);
 }
 
-//console.log(args[1]);
+// console.log(args[1]);
 
 var optsList = JSON.parse(args[1])[0];
 
 page.open(optsList.url, function (status) {
   var content = page.content;
-  fs.write(optsList.file, content, 'w');
+  try {
+    fs.write(optsList.file, content, 'w');
+  } catch(e) {
+    console.log(e);
+  }
   phantom.exit();
 });
