@@ -7,13 +7,15 @@
 #' for the documents, so we have to scrape the contents.
 #' 
 #' @importFrom digest digest
-#' @importFrom dplyr bind_rows distinct filter_ filter left_join select 
+#' @importFrom dplyr bind_rows distinct filter_ filter left_join select
 #' @importFrom httr http_error
 #' @importFrom magrittr %>%
 #' @importFrom parallel mclapply
 #' @importFrom pdfdown download_pdf
 #' @importFrom rvest html_attr html_node html_nodes html_table html_text
 #' @importFrom stringr str_trim
+#' @importFrom tibble data_frame
+#' @importFrom webshot install_phantomjs
 #' @importFrom xml2 read_html
 #' @docType package
 #' @name ecosscraper

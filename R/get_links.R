@@ -25,7 +25,8 @@ get_bulk_species_links <- function(urls, parallel = TRUE) {
   if(parallel) {
     result <- try(mclapply(urls,
                            FUN = get_species_links,
-                           mc.cores = 3))
+                           mc.cores = 3,
+                           mc.preschedule = FALSE))
   } else {
     result <- try(lapply(urls, FUN = get_species_links))
   }

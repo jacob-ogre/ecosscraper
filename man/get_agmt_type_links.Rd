@@ -7,7 +7,7 @@
 get_agmt_type_links(url, type, verbose = TRUE)
 }
 \arguments{
-\item{url}{The species' ECOS page URL to scrape}
+\item{url}{The species' ECOS page URL to scrape *OR* path to HTML of page}
 
 \item{type}{The type of conservation agreement to search for; one of
 \itemize{
@@ -26,9 +26,9 @@ A data.frame with plan type, plan name, species, and link to the plan
 Get a listing of link suffixes for HCPs, SHA, and CCA/As
 }
 \note{
-Does not use the ECOS conservation plan page
-because we know that many plans linked on species' ECOS pages do not 
-appear in the conservation plan portal.
+Does not use the ECOS conservation plan page because we know that many 
+plans linked on species' ECOS pages do not appear in the conservation plan 
+portal.
 }
 \examples{
 \dontrun{

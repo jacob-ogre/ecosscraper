@@ -74,6 +74,26 @@ join_for_links <- function(tab, links, species) {
       res <- left_join(tab, links, by = "Title")
       res$Species <- rep(species, length(res[[1]]))
       return(res)
+    } else if("HCP Plan Summaries" %in% names(tab)) {
+      res <- left_join(tab, links, by = c("HCP Plan Summaries" = "Title"))
+      res$Species <- rep(species, length(res[[1]]))
+      res <- distinct(res, Doc_Link, .keep_all = TRUE)
+      return(res)
+    } else if("SHA Plan Summaries" %in% names(tab)) {
+      res <- left_join(tab, links, by = c("SHA Plan Summaries" = "Title"))
+      res$Species <- rep(species, length(res[[1]]))
+      res <- distinct(res, Doc_Link, .keep_all = TRUE)
+      return(res)
+    } else if("CCA Plan Summaries" %in% names(tab)) {
+      res <- left_join(tab, links, by = c("CCA Plan Summaries" = "Title"))
+      res$Species <- rep(species, length(res[[1]]))
+      res <- distinct(res, Doc_Link, .keep_all = TRUE)
+      return(res)
+    } else if("CCAA Plan Summaries" %in% names(tab)) {
+      res <- left_join(tab, links, by = c("CCAA Plan Summaries" = "Title"))
+      res$Species <- rep(species, length(res[[1]]))
+      res <- distinct(res, Doc_Link, .keep_all = TRUE)
+      return(res)
     }
     tab$Species <- rep(species, length(tab[[1]]))
     return(tab)

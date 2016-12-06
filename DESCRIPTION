@@ -1,7 +1,7 @@
 Package: ecosscraper
 Type: Package
 Title: Tools to Scrape the ECOS Website, http://ecos.fws.gov
-Version: 0.2.1
+Version: 0.2.2
 Authors@R: person("Jacob", "Malcom", email = "jmalcom@defenders.org",
                   role = c("aut", "cre"))
 Maintainer: Jacob Malcom <jmalcom@defenders.org>
@@ -24,4 +24,5 @@ Imports:
     stringr,
     xml2
 Remotes:
-    Defenders-ESC/pdfdown
+    Defenders-ESC/pdfdown,
+    jacob-ogre/webshot
