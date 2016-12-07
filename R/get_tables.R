@@ -29,16 +29,14 @@ get_species_tables <- function(url, verbose = TRUE) {
   if(verbose) message(paste("Getting tables for", species))
   p_tables <- html_nodes(cur_page, "table")
   tab_res <- lapply(p_tables, get_table)
+  tab_res <- Filter(function(x) !is.null(x), tab_res)
   if(is.null(tab_res)) return(NULL)
   
-  link_tbl <- get_link_df(cur_page)  
+  link_tbl <- get_link_df(cur_page)
+  # return(list(tab_res, link_tbl))
   tab_upd <- lapply(tab_res, join_for_links, links = link_tbl, sp = species)
   tab_names <- lapply(tab_upd, function(x) suppressWarnings(get_table_type(x)))
   names(tab_upd) <- unlist(tab_names)
-  
-  # summary <- get_species_page_summary(cur_page, url, species)
-  # tab_upd[["scrape_info"]] <- summary
-  #TODO: remove NULL list elements...
   return(tab_upd)
 }
 
@@ -49,7 +47,7 @@ get_species_tables <- function(url, verbose = TRUE) {
 #' @seealso \link{get_tables}
 get_table <- function(tab) {
   res <- try(suppressWarnings(html_table(tab, fill = TRUE)), silent = TRUE)
-  if(class(res) != "try-error") {
+  if(class(res) != "try-error" & dim(res)[1] > 0) {
     return(res)
   } else {
     return(NULL)
@@ -69,8 +67,12 @@ get_table <- function(tab) {
 # @param species The scientific name to be included in the returned data.frame
 # @return A data.frame with URL, if tab includes a Title variable
 join_for_links <- function(tab, links, species) {
-  if(!is.null(tab)) {
-    if("Title" %in% names(tab)) {
+  if(!is.null(tab) & dim(tab)[1] > 0) {
+    if("Lead Region" %in% names(tab)) {
+      tab$Species <- rep(species, length(tab[[1]]))
+      tab$Status <- str_extract(tab$Status, pattern = '[A-Za-z, -]+$')
+      return(tab)
+    } else if("Title" %in% names(tab)) {
       res <- left_join(tab, links, by = "Title")
       res$Species <- rep(species, length(res[[1]]))
       return(res)
@@ -91,6 +93,11 @@ join_for_links <- function(tab, links, species) {
       return(res)
     } else if("CCAA Plan Summaries" %in% names(tab)) {
       res <- left_join(tab, links, by = c("CCAA Plan Summaries" = "Title"))
+      res$Species <- rep(species, length(res[[1]]))
+      res <- distinct(res, Doc_Link, .keep_all = TRUE)
+      return(res)
+    } else if("Petition Title" %in% names(tab)) {
+      res <- left_join(tab, links, by = c("Petitions Document(s)" = "Title"))
       res$Species <- rep(species, length(res[[1]]))
       res <- distinct(res, Doc_Link, .keep_all = TRUE)
       return(res)
@@ -129,6 +136,7 @@ get_table_type <- function(df) {
   DOC_TAB <- c("Date", "Citation Page", "Title", "Document Type", "Doc_Link",
                "Species")
   REV_TAB <- c("Date", "Title", "Doc_Link", "Species")
+  PET_TAB <- "Petition Title"
 
   if(is.null(names(df))) {
     return("UNK_TAB")
@@ -144,6 +152,8 @@ get_table_type <- function(df) {
     return("DOC_TAB")
   } else if(all(names(df) == REV_TAB)) {
     return("REV_TAB")
+  } else if(PET_TAB %in% names(df)) {
+    return("PET_TAB")
   } else {
     return(names(df)[1])
   }
@@ -159,3 +169,4 @@ bind_tables <- function(ls, table) {
   res <- lapply(names(ls), function(x) ls[[x]][[table]])
   return(dplyr::bind_rows(res))
 }
+
