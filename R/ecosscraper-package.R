@@ -8,7 +8,7 @@
 #' 
 #' @importFrom digest digest
 #' @importFrom dplyr bind_rows distinct filter_ filter left_join select
-#' @importFrom httr http_error
+#' @importFrom httr GET http_error write_disk
 #' @importFrom magrittr %>%
 #' @importFrom parallel mclapply
 #' @importFrom pdfdown download_pdf
