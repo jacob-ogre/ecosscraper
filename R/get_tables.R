@@ -173,12 +173,22 @@ bind_tables <- function(ls, table) {
 
 #' Get the table at https://ecos.fws.gov/ecp0/pub/speciesRecovery.jsp
 #' @export
-get_recovery_table <- function(subd) {
+get_recovery_table <- function() {
   url <- URLencode("https://ecos.fws.gov/ecp0/pub/speciesRecovery.jsp")
   if(class(try(http_error(url))) != "try-error") {
     pg <- try(xml2::read_html(url), silent = TRUE)
     if(class(pg)[1] != "try-error") {
       tab <- html_table(pg)
+      names(tab) <- c("Species_Info", "Plan_Name", "Plan_Act_Status",
+                      "Plan_Date", "Plan_Stage", "Lead_Region", "List_Status")
+      tab <- filter_rep_rows(tab)
+      sci <- extract_sci(tab)
+      atag <- html_nodes(pg, "a")
+      etag <- html_nodes(atag, "em")
+      etg2 <- html_text(etag)
+      etg3 <- unlist(str_trim(etg2))
+      href <- html_attr(atag, "href")
+      ltxt <- html_text(atag)
       return(tab[[1]])
     }
     warning("read_html error.")
@@ -187,3 +197,29 @@ get_recovery_table <- function(subd) {
   warning("http_error")
   return(NULL)
 }
+
+# Remove the nonsense taxonomic group rows
+filter_rep_rows <- function(tab) {
+  res <- filter(tab, tab$Species_Info != tab$Plan_Name)
+  return(res)
+}
+
+# Undo the name info concatenation from tab$Species_Info
+extract_name_info <- function(tab) {
+  spl <- str_split(tab$Species_Info, "\n")
+  if(length(spl[[1]]) != 4) {
+    message(paste("Length:", length(spl[[1]])))
+    stop("Something is wrong with the table: should be 4 elements after split.")
+  }
+  com <- unlist(lapply(seq_along(spl),
+                       function(x) str_trim(spl[[x]][1])))
+  plc <- unlist(lapply(seq_along(spl),
+                       function(x) str_trim(spl[[x]][2])))
+  plc <- str_replace(plc, "^-- ", "")
+  sci <- unlist(lapply(seq_along(spl),
+                       function(x) str_trim(spl[[x]][4])))
+  return(list(common = com, place = plc, scientific = sci))
+}
+
+
+
