@@ -36,7 +36,6 @@ get_TECP_table <- function() {
                            pattern = " ", 
                            replacement = "_",
                            fixed = TRUE)
-    print(names(all_spp))
     all_spp$Species_Page <- paste0(options()$ECOS_sp_prefix,
                                    all_spp$Species_Code)
     return(all_spp)
