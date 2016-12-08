@@ -107,3 +107,30 @@ get_species_page_summary <- function(url, species, pause = TRUE) {
                       stringsAsFactors = FALSE)
   return(tab_1)
 }
+
+#' Return a species' TSN from their ECOS page
+#' 
+#' @details FWS uses at least four different keys for species, including the TSN
+#' that is defined by ITIS (\url{http://itis.gov}). The TSN is used for some 
+#' JSON data queries; this function simplifies extraction.
+#'
+#' @param url The URL or path to a local HTML file for a species
+#' @export
+#' @examples
+#' \dontrun{
+#'   url <- "https://ecos.fws.gov/ecp0/profile/speciesProfile?spcode=A001"
+#'   get_species_tsn(url)
+#' }
+get_species_tsn <- function(url) {
+  if(grepl(url, pattern = "^http|^www")) {
+    pg <- get_species_page(url)
+  } else {
+    pg <- xml2::read_html(url)
+  }
+  scpt <- html_nodes(pg, "script")
+  text <- html_text(scpt)
+  text <- unlist(str_split(text, pattern = "\n"))
+  text <- text[grep(text, pattern = "var tsn")]
+  text <- str_extract(text, "[0-9]+")
+  return(text)
+}

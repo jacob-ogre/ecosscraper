@@ -67,6 +67,7 @@ get_table <- function(tab) {
 # @param species The scientific name to be included in the returned data.frame
 # @return A data.frame with URL, if tab includes a Title variable
 join_for_links <- function(tab, links, species) {
+  print(species)
   if(!is.null(tab) & dim(tab)[1] > 0) {
     if("Lead Region" %in% names(tab)) {
       tab$Species <- rep(species, length(tab[[1]]))
@@ -170,3 +171,19 @@ bind_tables <- function(ls, table) {
   return(dplyr::bind_rows(res))
 }
 
+#' Get the table at https://ecos.fws.gov/ecp0/pub/speciesRecovery.jsp
+#' @export
+get_recovery_table <- function(subd) {
+  url <- URLencode("https://ecos.fws.gov/ecp0/pub/speciesRecovery.jsp")
+  if(class(try(http_error(url))) != "try-error") {
+    pg <- try(xml2::read_html(url), silent = TRUE)
+    if(class(pg)[1] != "try-error") {
+      tab <- html_table(pg)
+      return(tab[[1]])
+    }
+    warning("read_html error.")
+    return(NULL)
+  }
+  warning("http_error")
+  return(NULL)
+}
