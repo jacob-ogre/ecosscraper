@@ -172,24 +172,65 @@ bind_tables <- function(ls, table) {
 }
 
 #' Get the table at https://ecos.fws.gov/ecp0/pub/speciesRecovery.jsp
+#' 
+#' @details In addition to the recovery plans listed on each species' page in
+#' ECOS, FWS maintains a single table of recovery plans and their purported 
+#' status (e.g., final). This fetches that table and splits apart the species 
+#' information variable.
+#' @return A data_frame with nine variables: \enumerate{
+#'   \item{Scientific_Name}
+#'   \item{Common_Name}
+#'   \item{Where_Listed}
+#'   \item{Plan_Name}
+#'   \item{Plan_URL}
+#'   \item{Plan_Date}
+#'   \item{Plan_Stage}
+#'   \item{Lead_Region}
+#'   \item{List_Status}
+#' }
 #' @export
+#' 
+#' @examples
+#' \dontrun{
+#'   rec <- get_recovery_table()
+#' }
 get_recovery_table <- function() {
   url <- URLencode("https://ecos.fws.gov/ecp0/pub/speciesRecovery.jsp")
   if(class(try(http_error(url))) != "try-error") {
     pg <- try(xml2::read_html(url), silent = TRUE)
     if(class(pg)[1] != "try-error") {
-      tab <- html_table(pg)
+      tab <- html_table(pg)[[1]]
       names(tab) <- c("Species_Info", "Plan_Name", "Plan_Act_Status",
                       "Plan_Date", "Plan_Stage", "Lead_Region", "List_Status")
       tab <- filter_rep_rows(tab)
-      sci <- extract_sci(tab)
+      entity <- extract_name_info(tab)
+      newt <- data_frame(Scientific_Name = entity$scientific,
+                         Common_Name = entity$common,
+                         Where_Listed = entity$place,
+                         Plan_Name = tab$Plan_Name,
+                         Plan_Date = as.Date(tab$Plan_Date, "%m/%d/%Y"),
+                         Plan_Stage = tab$Plan_Stage,
+                         Lead_Region = tab$Lead_Region,
+                         List_Status = tab$List_Status)
+      
       atag <- html_nodes(pg, "a")
-      etag <- html_nodes(atag, "em")
-      etg2 <- html_text(etag)
-      etg3 <- unlist(str_trim(etg2))
       href <- html_attr(atag, "href")
-      ltxt <- html_text(atag)
-      return(tab[[1]])
+      ltxt <- str_trim(html_text(atag))
+      atag_df <- data_frame(Plan_URL = ifelse(
+                                         grepl(href, 
+                                               pattern = "^http|^javascript"),
+                                         href,
+                                         paste0("http://ecos.fws.gov", href)),
+                            Plan_Name = ltxt)
+      new_df <- left_join(newt, atag_df, by = "Plan_Name")
+      new_df <- distinct(new_df, Scientific_Name, Where_Listed, Plan_Name,
+                         .keep_all = TRUE)
+      new_df <- data.frame(new_df[, 1:4],
+                           Plan_URL = new_df$Plan_URL,
+                           new_df[, 5:8],
+                           stringsAsFactors = FALSE)
+      new_df <- as_data_frame(new_df)
+      return(new_df)
     }
     warning("read_html error.")
     return(NULL)

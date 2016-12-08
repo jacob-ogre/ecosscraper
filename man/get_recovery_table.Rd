@@ -4,9 +4,28 @@
 \alias{get_recovery_table}
 \title{Get the table at https://ecos.fws.gov/ecp0/pub/speciesRecovery.jsp}
 \usage{
-get_recovery_table(subd)
+get_recovery_table()
+}
+\value{
+A data_frame with nine variables: \enumerate{
+  \item{Scientific_Name}
+  \item{Common_Name}
+  \item{Where_Listed}
+  \item{Plan_Name}
+  \item{Plan_URL}
+  \item{Plan_Date}
+  \item{Plan_Stage}
+  \item{Lead_Region}
+  \item{List_Status}
+}
 }
 \description{
 Get the table at https://ecos.fws.gov/ecp0/pub/speciesRecovery.jsp
+}
+\details{
+In addition to the recovery plans listed on each species' page in
+ECOS, FWS maintains a single table of recovery plans and their purported 
+status (e.g., final). This fetches that table and splits apart the species 
+information variable.
 }
 
