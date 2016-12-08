@@ -1,42 +1,3 @@
-#' Gather all links for all or a subset of species on ECOS
-#'
-#' Collects all of the links (URLs) from ECOS for a set of species.
-#'
-#' @details Automates the process of gathering links, which may in turn be 
-#' followed or, in the case of documents or tables, be downloaded. This is a
-#' convenience wrapper over \link{get_species_links}.
-#'
-#' @param urls A vector of urls from ECOS to visit for link-gathering
-#' @param parallel Try parallel scraping [default = TRUE]
-#' @return A data.frame with variables:
-#'   \describe{
-#'     \item{Scientific_Name}{Self-explanatory}
-#'     \item{href}{The URL as given on the ECOS page}
-#'     \item{link}{The URL with domain information added}
-#'     \item{text}{The text representation of the URL}
-#'   }
-#' @seealso \link{remove_silly_links} \link{get_species_links}
-#' @export
-#' @examples
-#' \dontrun{
-#'   res <- get_bulk_species_links(TECP_table$Species_Page[1:3])
-#' }
-get_bulk_species_links <- function(urls, parallel = TRUE) {
-  if(parallel) {
-    result <- try(mclapply(urls,
-                           FUN = get_species_links,
-                           mc.cores = 3,
-                           mc.preschedule = FALSE))
-  } else {
-    result <- try(lapply(urls, FUN = get_species_links))
-  }
-  if(class(result[1]) != "try-error") {
-    result <- bind_rows(result)
-    return(result)
-  }
-  stop("A scraping error occurred. Please check the traceback, if available.")
-}
-
 #' Return all links on a species' ECOS page
 #'
 #' Return a data.frame with links (and anchor text) from a species' ECOS page.
@@ -80,11 +41,10 @@ get_species_links <- function(url, clean = TRUE, pause = TRUE, verbose = TRUE) {
   base_ln <- dirname(url)
   full_ln <- simplify2array(lapply(hrefs, FUN = fill_link, base_ln))
   texts <- html_text(a_nodes)
-  res <- data.frame(Scientific_Name = rep(species, length(hrefs)),
+  res <- data_frame(Scientific_Name = rep(species, length(hrefs)),
                     href = hrefs,
                     link = full_ln,
-                    text = str_trim(texts),
-                    stringsAsFactors = FALSE)
+                    text = str_trim(texts))
   if(clean) res <- remove_silly_links(res)
   return(res)
 }
@@ -92,11 +52,10 @@ get_species_links <- function(url, clean = TRUE, pause = TRUE, verbose = TRUE) {
 # Warning with a data.frame return for bad get_species_links
 err_res <- function(e, species) {
   warning(paste("Warning:", e, species))
-  err_res <- data.frame(Scientific_Name = species,
+  err_res <- data_frame(Scientific_Name = species,
                         href = "No page",
                         link = "No page",
-                        text = "No page",
-                        stringsAsFactors = FALSE)
+                        text = "No page")
   return(err_res)
 }
 

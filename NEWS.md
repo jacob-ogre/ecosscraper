@@ -1,3 +1,8 @@
+# ecosscraper 0.3.1
+
+- Removed the bulk link extractor function...it's not very robust and is easy
+enough to write anyway.
+
 # ecosscraper 0.3.0
 
 - Extensive updates to get more information from ECOS.
