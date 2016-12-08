@@ -48,7 +48,7 @@ download_pic <- function(url, subd, pause = TRUE) {
     return(data_frame(url = url,
                       dest = dest,
                       success = "Success",
-                      imgCheck = is_img(url)))
+                      imgCheck = is_img(dest)))
   } else {
     return(data_frame(url = url,
                       dest = NA,
