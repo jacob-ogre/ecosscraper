@@ -33,18 +33,17 @@ get_species_tables <- function(url, verbose = TRUE) {
   if(is.null(tab_res)) return(NULL)
   
   link_tbl <- get_link_df(cur_page)
-  # return(list(tab_res, link_tbl))
   tab_upd <- lapply(tab_res, join_for_links, links = link_tbl, sp = species)
   tab_names <- lapply(tab_upd, function(x) suppressWarnings(get_table_type(x)))
   names(tab_upd) <- unlist(tab_names)
   return(tab_upd)
 }
 
-#' Return a table from an ECOS page
-#'
-#' @param tab A table from an rvest::html_nodes object
-#' @return The table as a data.frame
-#' @seealso \link{get_tables}
+# Return a table from an ECOS page
+#
+# @param tab A table from an rvest::html_nodes object
+# @return The table as a data.frame
+# @seealso \link{get_tables}
 get_table <- function(tab) {
   res <- try(suppressWarnings(html_table(tab, fill = TRUE)), silent = TRUE)
   if(class(res) != "try-error" & dim(res)[1] > 0) {

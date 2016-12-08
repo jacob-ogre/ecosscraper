@@ -14,7 +14,7 @@ download_document(url, file, pause = TRUE)
 \item{pause}{Whether to pause for 0.5-3 seconds during scraping}
 }
 \value{
-A data_frame with destination and success
+A data_frame with destination and success information
 }
 \description{
 Simple function to download a file from ECOS

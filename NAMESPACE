@@ -3,6 +3,7 @@
 export(bind_tables)
 export(download_document)
 export(download_pic)
+export(download_species_page)
 export(filter_domestic)
 export(filter_listed)
 export(filter_taxa)

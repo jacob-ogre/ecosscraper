@@ -1,15 +1,54 @@
-download_species_page <- function(url, file, type = c("plain", "dynamic")) {
+#' Download a species' ECOS page
+#' 
+#' @details A wrapper around \link[httr]{GET} with several checks to make
+#' downloads more likely / robust. 
+#'
+#' @param url The URL of the HTML page to download
+#' @param file The file to which the HTML will be written
+#' @return A data_frame with four variables: \describe{
+#'   \item{url}{The URL that was downloaded or attempted}
+#'   \item{dest}{The file to which the HTML was written}
+#'   \item{success}{Whether the download was a \code{success} or \code{failed}}
+#'   \item{htmlCheck}{Whether the downloaded file is an HTML [bool]}
+#' }
+#' @export
+#' @examples
+#' \dontrun{
+#'   get_species_url("Helianthus paradoxus") %>% 
+#'     download_species_page("~/Downloads/HELPAR_2016-12-08.html")
+#' }
+download_species_page <- function(url, file) {
   url <- URLencode(url)
-  if(type == "plain") {
-    if(class(try(http_error(url), silent = TRUE)) != "try-error") {
-      pg <- httr::GET(url)
-      if(pg$status == 200) {
-        html <- content(pg, as = "text")
-        writeLines(html, con = file)
-      }
+  subd <- dirname(file)
+  if(!dir.exists(subd)) dir.create(subd, recursive = TRUE)
+  if(class(try(http_error(url), silent = TRUE)) != "try-error") {
+    pg <- httr::GET(url)
+    if(pg$status == 200) {
+      html <- content(pg, as = "text")
+      writeLines(html, con = file)
+      return(data_frame(url = url,
+                        dest = file,
+                        success = "Success",
+                        htmlCheck = is_html(file)))
+    } else {
+      return(data_frame(url = url,
+                        dest = NA,
+                        success = "Failed",
+                        htmlCheck = NA))
     }
+  } else {
+      return(data_frame(url = url,
+                        dest = NA,
+                        success = "Failed",
+                        htmlCheck = NA))
   }
 }
+
+is_html <- function(f) {
+  if(grepl(f, pattern = "html$|htm$")) return(TRUE)
+  return(FALSE)
+}
+
 #' GET a document from ECOS.
 #'
 #' Simple function to download a file from ECOS
@@ -24,7 +63,7 @@ download_species_page <- function(url, file, type = c("plain", "dynamic")) {
 #' @param url A URL from ECOS to download a document
 #' @param file File to which the document will be downloaded
 #' @param pause Whether to pause for 0.5-3 seconds during scraping
-#' @return A data_frame with destination and success 
+#' @return A data_frame with destination and success information
 #' @seealso \link[pdfdown]{download_pdf}
 #' @export
 #' @examples
@@ -33,7 +72,7 @@ download_species_page <- function(url, file, type = c("plain", "dynamic")) {
 #'                            "~/Downloads/doc3847.pdf")
 #' }
 download_document <- function(url, file, pause = TRUE) {
-  pdfdown::download_pdf(url = url, subd = file, pause = pause)
+  pdfdown::download_pdf(url = url, file = file, pause = pause)
 }
 
 #' Download an image file
@@ -45,6 +84,7 @@ download_document <- function(url, file, pause = TRUE) {
 #' @param file The file to which the image will be written
 #' @export
 download_pic <- function(url, file) {
+  url <- URLencode(url)
   subd <- dirname(file)
   if(!dir.exists(subd)) dir.create(subd, recursive = TRUE)
   if(class(try(http_error(url), silent = TRUE)) != "try-error") {
