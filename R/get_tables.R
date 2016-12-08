@@ -46,7 +46,7 @@ get_species_tables <- function(url, verbose = TRUE) {
 # @seealso \link{get_tables}
 get_table <- function(tab) {
   res <- try(suppressWarnings(html_table(tab, fill = TRUE)), silent = TRUE)
-  if(class(res) != "try-error" & dim(res)[1] > 0) {
+  if(class(res) != "try-error") {
     return(res)
   } else {
     return(NULL)
