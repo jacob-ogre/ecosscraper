@@ -31,12 +31,12 @@
 get_TECP_table <- function() {
   if(!http_error(options()$TE_list)) {
     page <- read_html(options()$TE_list)
-    tabl <- html_nodes(page, "table")
-    all_spp <- as.data.frame(html_table(tabl))
+    all_spp <- as_data_frame(html_table(page)[[1]])
     names(all_spp) <- gsub(x = names(all_spp), 
-                           pattern = ".", 
+                           pattern = " ", 
                            replacement = "_",
                            fixed = TRUE)
+    print(names(all_spp))
     all_spp$Species_Page <- paste0(options()$ECOS_sp_prefix,
                                    all_spp$Species_Code)
     return(all_spp)
