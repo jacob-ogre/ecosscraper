@@ -21,6 +21,9 @@
 <li>
   <a href="reference/index.html">Reference</a>
 </li>
+<li>
+  <a href="news/index.html">News</a>
+</li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
   <a href="https://github.com/jacob-ogre/ecosscraper/">
     <span class="fa fa-github fa-lg"></span>
@@ -62,17 +65,19 @@
 <span class="st">             </span><span class="kw"><a href="reference/get_species_links.html">get_species_links</a></span>() %&gt;%
 <span class="st">             </span><span class="kw"><a href="reference/get_5yrev_links.html">get_5yrev_links</a></span>()</code></pre></div>
 <p>Another function that might get considerable use is <code>download_document</code>, which writes the requested document (PDFs) to file,</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">result &lt;-<span class="st"> </span><span class="kw"><a href="reference/download_document.html">download_document</a></span>(<span class="st">"http://ecos.fws.gov/docs/five_year_review/doc3847.pdf"</span>, <span class="st">"~/Downloads"</span>)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="reference/download_document.html">download_document</a></span>(<span class="st">"http://ecos.fws.gov/docs/five_year_review/doc3847.pdf"</span>,
+                  <span class="st">"~/Downloads/doc3847.pdf"</span>)</code></pre></div>
 </div>
 <div id="updating" class="section level2">
 <h2 class="hasAnchor">
 <a href="#updating" class="anchor"> </a>Updating</h2>
-<p>The package includes one dataset, the table of threatened, endangered, candidate, and proposed species (<code>TECP_table</code>) using a search from <a href="http://ecos.fws.gov/ecp0/reports/ad-hoc-species-report-input">here</a>. The built in TECP_table was scraped 30 Nov 2016, but the content of ECOS can change at any time. The package scrapes the report page <code>.onAttach</code> so that the newest data is available for each session. If ECOS can&rsquo;t be reached, then the built-in TECP_table is used. Alternatively, <code>TECP_table &lt;- get_TECP_table()</code> may be used to try updating mid-session.</p>
+<p>The package includes one dataset, the table of threatened, endangered, candidate, and proposed species (<code>TECP_table</code>) using a search from <a href="http://ecos.fws.gov/ecp0/reports/ad-hoc-species-report-input">here</a>. The built in TECP_table was scraped 30 Nov 2016, but the content of ECOS can change at any time. We <strong>strongly</strong> recommend using <code>TECP_table &lt;- get_TECP_table()</code> at the beginning of an R session to get new data.</p>
 <p>Checking for new links across all listed species can take a bit of time using defaults: the main page-getter will pause for 0.5-3 seconds by default, so as to not hammer the FWS server too much. (Checking for updates for a single species is quick.) We are using <code>ecosscraper</code> to set up a <code>cron</code> job that checks all species&rsquo; pages on a weekly basis; the script and <code>cron</code> settings will be added to this repo in the future.</p>
 </div>
 <div id="bugs" class="section level2">
 <h2 class="hasAnchor">
 <a href="#bugs" class="anchor"> </a>Bugs</h2>
+<p>Find a bug or have a question? Submit an issue on <a href="https://github.com/Defenders-ESC/pdfdown/issues">GitHub</a>! Alternatively, <a href="mailto:esa@defenders.org">get in touch</a>.</p>
 </div>
 <div id="contributing" class="section level2">
 <h2 class="hasAnchor">

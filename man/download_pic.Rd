@@ -4,12 +4,12 @@
 \alias{download_pic}
 \title{Download an image file}
 \usage{
-download_pic(url, subd, pause = TRUE)
+download_pic(url, file)
 }
 \arguments{
 \item{url}{The URL of the image to download}
 
-\item{subd}{The directory to which the image will be written}
+\item{file}{The file to which the image will be written}
 }
 \description{
 Download an image file

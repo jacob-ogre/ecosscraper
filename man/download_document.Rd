@@ -4,12 +4,12 @@
 \alias{download_document}
 \title{GET a document from ECOS.}
 \usage{
-download_document(url, subd, pause = TRUE)
+download_document(url, file, pause = TRUE)
 }
 \arguments{
 \item{url}{A URL from ECOS to download a document}
 
-\item{subd}{Subdirectory to which the document will be downloaded}
+\item{file}{File to which the document will be downloaded}
 
 \item{pause}{Whether to pause for 0.5-3 seconds during scraping}
 }
@@ -29,7 +29,8 @@ directory, subd.
 }
 \examples{
 \dontrun{
-  res <- download_document("http://ecos.fws.gov/docs/five_year_review/doc3847.pdf", "~/Downloads")
+  res <- download_document("http://ecos.fws.gov/docs/five_year_review/doc3847.pdf", 
+                           "~/Downloads/doc3847.pdf")
 }
 }
 \seealso{

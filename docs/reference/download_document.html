@@ -54,6 +54,9 @@
 <li>
   <a href="../reference/index.html">Reference</a>
 </li>
+<li>
+  <a href="../news/index.html">News</a>
+</li>
       </ul>
       
       <ul class="nav navbar-nav navbar-right">
@@ -81,14 +84,14 @@
     <p>Simple function to download a file from ECOS</p>
     
 
-    <pre><span class='fu'>download_document</span>(<span class='no'>url</span>, <span class='no'>subd</span>, <span class='kw'>pause</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</pre>
+    <pre><span class='fu'>download_document</span>(<span class='no'>url</span>, <span class='no'>file</span>, <span class='kw'>pause</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
     <dl class="dl-horizontal">
       <dt>url</dt>
       <dd>A URL from ECOS to download a document</dd>
-      <dt>subd</dt>
-      <dd>Subdirectory to which the document will be downloaded</dd>
+      <dt>file</dt>
+      <dd>File to which the document will be downloaded</dd>
       <dt>pause</dt>
       <dd>Whether to pause for 0.5-3 seconds during scraping</dd>
     </dl>
@@ -112,7 +115,8 @@ directory, subd.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='co'>## Not run: ------------------------------------</span>
-<span class='co'>#   res &lt;- download_document("http://ecos.fws.gov/docs/five_year_review/doc3847.pdf", "~/Downloads")</span>
+<span class='co'>#   res &lt;- download_document("http://ecos.fws.gov/docs/five_year_review/doc3847.pdf", </span>
+<span class='co'>#                            "~/Downloads/doc3847.pdf")</span>
 <span class='co'>## ---------------------------------------------</span></div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
