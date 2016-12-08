@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Get a listing of link suffixes for HCPs, SHA, and CCA/As — get_agmt_type_links • ecosscraper</title>
+<title>Get a summary data.frame of an ECOS page scrape — get_species_page_summary • ecosscraper</title>
 
 <!-- jquery -->
 <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script>
@@ -74,64 +74,45 @@
       <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Get a listing of link suffixes for HCPs, SHA, and CCA/As</h1>
+    <h1>Get a summary data.frame of an ECOS page scrape</h1>
     </div>
 
     
-    <p>Get a listing of link suffixes for HCPs, SHA, and CCA/As</p>
+    <p>By default, <code>get_species_page_summary</code> will fetch the species&#39; ECOS page
+given the URL, but there may be times when the page has already been fetched.
+In those cases, the page can be specified to save time.</p>
     
 
-    <pre><span class='fu'>get_agmt_type_links</span>(<span class='no'>url</span>, <span class='no'>type</span>, <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</pre>
+    <pre><span class='fu'>get_species_page_summary</span>(<span class='no'>url</span>, <span class='no'>species</span>, <span class='kw'>pause</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
     <dl class="dl-horizontal">
       <dt>url</dt>
-      <dd>The species&#39; ECOS page URL to scrape *OR* path to HTML of page</dd>
-      <dt>type</dt>
-      <dd>The type of conservation agreement to search for; one of
-<ul>
-<li>HCP
-  </li>
-<li>SHA
-  </li>
-<li>CCA
-  </li>
-<li>CCAA
-</li>
-</ul>
-</dd>
-      <dt>verbose</dt>
-      <dd>Print messages while processing [default = TRUE]</dd>
+      <dd>The url of the species page</dd>
+      <dt>species</dt>
+      <dd>The scientific name of the species</dd>
+      <dt>pause</dt>
+      <dd>Pause for 0.5-3s during scraping [default = TRUE]</dd>
+      <dt>pg</dt>
+      <dd>An ECOS species page from <a href='get_species_page.html'>get_species_page</a></dd>
     </dl>
-    
-    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
-
-    <p>A data.frame with plan type, plan name, species, and link to the plan</p>
     
     <h2 class="hasAnchor" id="note"><a class="anchor" href="#note"></a>Note</h2>
 
-    <p>Does not use the ECOS conservation plan page because we know that many 
-plans linked on species&#39; ECOS pages do not appear in the conservation plan 
-portal.</p>
+    <p>Apparently, FWS does not serve the same version of a species&#39; page up
+twice in a row. Instead, the same information will be presented in different
+orders. We have to use <code>strsplit</code> along with <a href='http://www.rdocumentation.org/packages/stringr/topics/str_trim'>str_trim</a> to
+get clean lines, then sort before doing the MD5 hash.</p>
     
 
-    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='co'>## Not run: ------------------------------------</span>
-<span class='co'># agmt &lt;- get_species_url("Gila purpurea") %&gt;%</span>
-<span class='co'>#           get_agmt_type_links(type = "HCP")</span>
-<span class='co'>## ---------------------------------------------</span></div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
       <li><a href="#arguments">Arguments</a></li>
       
-      <li><a href="#value">Value</a></li>
-
       <li><a href="#note">Note</a></li>
-      
-      <li><a href="#examples">Examples</a></li>
-    </ul>
+          </ul>
 
   </div>
 </div>

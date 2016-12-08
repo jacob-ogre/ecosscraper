@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Get a listing of link suffixes for HCPs, SHA, and CCA/As — get_agmt_type_links • ecosscraper</title>
+<title>Install phantomjs — install_phantom • ecosscraper</title>
 
 <!-- jquery -->
 <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script>
@@ -74,64 +74,30 @@
       <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Get a listing of link suffixes for HCPs, SHA, and CCA/As</h1>
+    <h1>Install phantomjs</h1>
     </div>
 
     
-    <p>Get a listing of link suffixes for HCPs, SHA, and CCA/As</p>
+    <p>Install phantomjs</p>
     
 
-    <pre><span class='fu'>get_agmt_type_links</span>(<span class='no'>url</span>, <span class='no'>type</span>, <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</pre>
-    
-    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
-    <dl class="dl-horizontal">
-      <dt>url</dt>
-      <dd>The species&#39; ECOS page URL to scrape *OR* path to HTML of page</dd>
-      <dt>type</dt>
-      <dd>The type of conservation agreement to search for; one of
-<ul>
-<li>HCP
-  </li>
-<li>SHA
-  </li>
-<li>CCA
-  </li>
-<li>CCAA
-</li>
-</ul>
-</dd>
-      <dt>verbose</dt>
-      <dd>Print messages while processing [default = TRUE]</dd>
-    </dl>
-    
-    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+    <pre><span class='fu'>install_phantom</span>()</pre>
+        
+    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>A data.frame with plan type, plan name, species, and link to the plan</p>
-    
-    <h2 class="hasAnchor" id="note"><a class="anchor" href="#note"></a>Note</h2>
-
-    <p>Does not use the ECOS conservation plan page because we know that many 
-plans linked on species&#39; ECOS pages do not appear in the conservation plan 
-portal.</p>
+    <p>A simple wrapper over <a href='http://www.rdocumentation.org/packages/webshot/topics/install_phantomjs'>install_phantomjs</a>. NOTE that 
+this requires using the fork at <a href = 'https://github.com/jacob-ogre/webshot'>https://github.com/jacob-ogre/webshot</a>
+if you are using R version 3.3.2, at least until the pull request is merged
+into the main branch of <code>webshot</code>.</p>
     
 
-    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='co'>## Not run: ------------------------------------</span>
-<span class='co'># agmt &lt;- get_species_url("Gila purpurea") %&gt;%</span>
-<span class='co'>#           get_agmt_type_links(type = "HCP")</span>
-<span class='co'>## ---------------------------------------------</span></div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
-      <li><a href="#arguments">Arguments</a></li>
       
-      <li><a href="#value">Value</a></li>
-
-      <li><a href="#note">Note</a></li>
-      
-      <li><a href="#examples">Examples</a></li>
-    </ul>
+      <li><a href="#details">Details</a></li>
+          </ul>
 
   </div>
 </div>

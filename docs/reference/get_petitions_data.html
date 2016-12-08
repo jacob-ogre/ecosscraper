@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Get a listing of link suffixes for HCPs, SHA, and CCA/As — get_agmt_type_links • ecosscraper</title>
+<title>Get data on ESA action petitions — get_petitions_data • ecosscraper</title>
 
 <!-- jquery -->
 <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script>
@@ -74,51 +74,60 @@
       <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Get a listing of link suffixes for HCPs, SHA, and CCA/As</h1>
+    <h1>Get data on ESA action petitions</h1>
     </div>
 
     
-    <p>Get a listing of link suffixes for HCPs, SHA, and CCA/As</p>
+    <p>Get data on ESA action petitions</p>
     
 
-    <pre><span class='fu'>get_agmt_type_links</span>(<span class='no'>url</span>, <span class='no'>type</span>, <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</pre>
+    <pre><span class='fu'>get_petitions_data</span>(<span class='kw'>tsn</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
     <dl class="dl-horizontal">
-      <dt>url</dt>
-      <dd>The species&#39; ECOS page URL to scrape *OR* path to HTML of page</dd>
-      <dt>type</dt>
-      <dd>The type of conservation agreement to search for; one of
-<ul>
-<li>HCP
-  </li>
-<li>SHA
-  </li>
-<li>CCA
-  </li>
-<li>CCAA
-</li>
-</ul>
-</dd>
-      <dt>verbose</dt>
-      <dd>Print messages while processing [default = TRUE]</dd>
+      <dt>tsn</dt>
+      <dd>The TSN identifier for a species, or NULL for all [default = NULL]</dd>
     </dl>
     
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>A data.frame with plan type, plan name, species, and link to the plan</p>
+    <p>A data_frame with 11 variables: <dl class='dl-horizontal'>
+  <dt>Petition_Title</dt><dd>The title given by ECOS</dd>
+  <dt>Petition_Date</dt><dd>The date of the petition</dd>
+  <dt>Area_Covered</dt><dd>The states, countries, or regions covered; comma-sep</dd>
+  <dt>Petitioners</dt><dd>A semicolon-separated list of petitioners</dd>
+  <dt>Action_Requested</dt><dd>A semicolon-separated list of requested actions</dd>
+  <dt>Action_Result</dt><dd>FWS&#39;s conclusion on the petition</dd>
+  <dt>Action_Result_URL</dt><dd>URL to FWS&#39;s conclusion, if any</dd>
+  <dt>Active_Petition</dt><dd>Whether FWS considers the petition active</dd>
+  <dt>Petition_Doc_Title</dt><dd>A semicolon-separated list of documents that
+      comprise the petition</dd>
+  <dt>Petition_Doc_URL</dt><dd>A semicolon-separated list of URLs to the petition
+      documents, if any</dd>
+  <dt>TSN</dt><dd>The TSN of the query</dd>
+</dl></p>
+    
+    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+
+    <p>ECOS provides a &#39;slot&#39; for a table of petitions for species, but 
+that table is javascript-generated. Interestingly, we can get the raw data
+using a <a href='http://www.rdocumentation.org/packages/httr/topics/GET'>GET</a> call. The request is keyed to the species TSN, which
+is the key used by ITIS, not the `Species Code` that FWS uses for most other 
+identifiers. The default <code>tsn = NULL</code> will get all of the petition data,
+but there is no reliable key to link petitions to species.</p>
     
     <h2 class="hasAnchor" id="note"><a class="anchor" href="#note"></a>Note</h2>
 
-    <p>Does not use the ECOS conservation plan page because we know that many 
-plans linked on species&#39; ECOS pages do not appear in the conservation plan 
-portal.</p>
+    <p>The structure of the returned data_frame could be improved to expand
+the variables that are stored as strings of semicolon-delimited lists, but 
+at the cost of substantially larger (and perhaps more confusing) dfs.</p>
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='co'>## Not run: ------------------------------------</span>
-<span class='co'># agmt &lt;- get_species_url("Gila purpurea") %&gt;%</span>
-<span class='co'>#           get_agmt_type_links(type = "HCP")</span>
+<span class='co'>#   url &lt;- "https://ecos.fws.gov/ecp0/profile/speciesProfile?spcode=A001"</span>
+<span class='co'>#   tsn &lt;- get_species_tsn(url)</span>
+<span class='co'>#   pet &lt;- get_petitions_data(tsn)</span>
 <span class='co'>## ---------------------------------------------</span></div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
@@ -127,6 +136,8 @@ portal.</p>
       <li><a href="#arguments">Arguments</a></li>
       
       <li><a href="#value">Value</a></li>
+
+      <li><a href="#details">Details</a></li>
 
       <li><a href="#note">Note</a></li>
       

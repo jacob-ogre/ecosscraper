@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{get_species_tsn}
 \alias{get_species_tsn}
-\title{Return a species' TSN from their ECOS page}
+\title{Return a species' TSN from its ECOS page}
 \usage{
 get_species_tsn(url)
 }
@@ -10,7 +10,7 @@ get_species_tsn(url)
 \item{url}{The URL or path to a local HTML file for a species}
 }
 \description{
-Return a species' TSN from their ECOS page
+Return a species' TSN from its ECOS page
 }
 \details{
 FWS uses at least four different keys for species, including the TSN

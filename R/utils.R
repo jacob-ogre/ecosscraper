@@ -108,7 +108,7 @@ get_species_page_summary <- function(url, species, pause = TRUE) {
   return(tab_1)
 }
 
-#' Return a species' TSN from their ECOS page
+#' Return a species' TSN from its ECOS page
 #' 
 #' @details FWS uses at least four different keys for species, including the TSN
 #' that is defined by ITIS (\url{http://itis.gov}). The TSN is used for some 

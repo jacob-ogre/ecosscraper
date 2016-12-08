@@ -28,4 +28,9 @@ ECOS, FWS maintains a single table of recovery plans and their purported
 status (e.g., final). This fetches that table and splits apart the species 
 information variable.
 }
+\examples{
+\dontrun{
+  rec <- get_recovery_table()
+}
+}
 
