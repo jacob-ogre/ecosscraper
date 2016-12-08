@@ -120,8 +120,7 @@ data is loaded</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='co'># To replace the TECP_table that is loaded on startup (attach)</span>
-<span class='no'>TECP_table</span> <span class='kw'>&lt;-</span> <span class='fu'>get_TECP_table</span>()
-<span class='fu'>head</span>(<span class='no'>TECP_table</span>)</div><div class='output co'>#&gt;           Scientific_Name                Common_Name Species_Code
+<span class='no'>TECP_table</span> <span class='kw'>&lt;-</span> <span class='fu'>get_TECP_table</span>()</div><div class='output co'>#&gt; <span class='error'>Error in `$&lt;-.data.frame`(`*tmp*`, &quot;Species_Page&quot;, value = &quot;http://ecos.fws.gov/tess_public/profile/speciesProfile.action?spcode=&quot;): replacement has 1 row, data has 0</span></div><div class='input'><span class='fu'>head</span>(<span class='no'>TECP_table</span>)</div><div class='output co'>#&gt;           Scientific_Name                Common_Name Species_Code
 #&gt; 1     Abies guatemalensis Guatemalan Fir (=pinabete)         R003
 #&gt; 2      Abronia macrocarpa Large-fruited sand-verbena         Q24E
 #&gt; 3 Abutilon eremitopetalum             No common name         Q1SJ

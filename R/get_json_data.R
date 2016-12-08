@@ -31,10 +31,13 @@
 #' @examples
 #' \dontrun{
 #'   url <- "https://ecos.fws.gov/ecp0/profile/speciesProfile?spcode=A001"
-#'   tsn <- get_species_tsn(url)
-#'   pet <- get_petitions_data(tsn)
+#'   pet <- get_species_tsn(url) %>% get_petitions_table()
+#'   # or
+#'   pet <- get_species_url("Myotis sodalis") %>%
+#'            get_species_tsn() %>%
+#'            get_petitions_table()
 #' }
-get_petitions_data <- function(tsn = NULL) {
+get_petitions_table <- function(tsn = NULL) {
   resp <- GET("http://ecos.fws.gov/ecp/report/table/petitions-received.json", 
               query = list(tsn = tsn, active = "any"))
   json <- httr::content(resp, as = "text")
