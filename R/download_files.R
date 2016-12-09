@@ -5,6 +5,7 @@
 #'
 #' @param url The URL of the HTML page to download
 #' @param file The file to which the HTML will be written
+#' @param overwrite Whether to overwrite pre-existing file
 #' @return A data_frame with four variables: \describe{
 #'   \item{url}{The URL that was downloaded or attempted}
 #'   \item{dest}{The file to which the HTML was written}
