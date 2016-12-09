@@ -19,7 +19,7 @@
 #'     download_species_page("~/Downloads/HELPAR_2016-12-08.html")
 #' }
 download_species_page <- function(url, file, overwrite = FALSE) {
-  if(file.exists(file) & !overwrite) {
+  if(file.exists(file) & !overwrite & file.size(file) > 1000) {
       return(data_frame(url = url,
                         dest = NA,
                         success = "Pre-exist",
