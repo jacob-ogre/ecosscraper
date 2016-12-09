@@ -21,9 +21,9 @@
 download_species_page <- function(url, file, overwrite = FALSE) {
   if(file.exists(file) & !overwrite & file.size(file) > 1000) {
       return(data_frame(url = url,
-                        dest = NA,
+                        dest = file,
                         success = "Pre-exist",
-                        htmlCheck = NA))
+                        htmlCheck = TRUE))
   }
   url <- URLencode(url)
   subd <- dirname(file)
