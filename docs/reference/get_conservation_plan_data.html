@@ -84,33 +84,34 @@
     <p>Get data linked to a section 10 conservation plan</p>
     
 
-    <pre><span class='fu'>get_conservation_plan_data</span>(<span class='no'>url</span>)</pre>
+    <pre><span class='fu'>get_conservation_plan_data</span>(<span class='no'>url</span>, <span class='no'>species</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
     <dl class="dl-horizontal">
       <dt>url</dt>
       <dd>The URL of the summary page for a section 10 conservation plan</dd>
+      <dt>species</dt>
+      <dd>The species from whose ECOS page the plan URL was gathered</dd>
     </dl>
     
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>A list of two items <dl class='dl-horizontal'>
-  <dt>table</dt><dd>A data_frame of summary data about the agreement</dd>
-  <dt>pdfs</dt><dd>A data_frame of links to agreement documents</dd>
-</dl></p>
+    <p>A data_frame of summary data about the agreement or NULL</p>
     
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>This function returns two distinct items, a table of summary data
-and a table of linked documents. Most other functions in the package should
-return a single item, but rather than visiting the conservation plan page 
-twice, we get both pieces of content at the same time.</p>
+    <p>The ECOS pages for conservation plans include covered species,
+(<code>Listed_Species / Non-Listed_Species</code>), but those &quot;lists&quot; are just a
+concatenation of common names, scientific names, where listed, etc. The
+<code>species</code> parameter is used to tie outgoing links from a species&#39; ECOS
+page to the summary data. These can later be checked to make sure that all
+covered species listed on the plan page are linked to the species&#39; page.</p>
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='co'>## Not run: ------------------------------------</span>
 <span class='co'>#   url &lt;- "https://ecos.fws.gov/conserv_plans/conservationPlan/plan?plan_id=1470"</span>
-<span class='co'>#   URARHO &lt;- get_conservation_plan_table(url)</span>
+<span class='co'>#   URARHO &lt;- get_conservation_plan_data(url, "Ursus arctos horribilis")</span>
 <span class='co'>## ---------------------------------------------</span></div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">

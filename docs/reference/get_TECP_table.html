@@ -123,19 +123,34 @@ data is loaded</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='co'># To replace the TECP_table that is loaded on startup (attach)</span>
-<span class='no'>TECP_table</span> <span class='kw'>&lt;-</span> <span class='fu'>get_TECP_table</span>()
-<span class='fu'>head</span>(<span class='no'>TECP_table</span>)</div><div class='output co'>#&gt; # A tibble: 6 × 11
-#&gt;           Scientific_Name                Common_Name Species_Code
-#&gt;                     &lt;chr&gt;                      &lt;chr&gt;        &lt;chr&gt;
+<span class='no'>TECP_table</span> <span class='kw'>&lt;-</span> <span class='fu'>get_TECP_table</span>()</div><div class='output co'>#&gt; <span class='error'>Error in get_TECP_table(): could not find function &quot;as_data_frame&quot;</span></div><div class='input'><span class='fu'>head</span>(<span class='no'>TECP_table</span>)</div><div class='output co'>#&gt;           Scientific_Name                Common_Name Species_Code
 #&gt; 1     Abies guatemalensis Guatemalan Fir (=pinabete)         R003
 #&gt; 2      Abronia macrocarpa Large-fruited sand-verbena         Q24E
 #&gt; 3 Abutilon eremitopetalum             No common name         Q1SJ
 #&gt; 4      Abutilon menziesii                Ko`oloa`ula         Q1SK
 #&gt; 5    Abutilon sandwicense             No common name         Q1SL
 #&gt; 6           Acaena exigua                    Liliwai         Q1SM
-#&gt; # ... with 8 more variables: Critical_Habitat &lt;chr&gt;, Species_Group &lt;chr&gt;,
-#&gt; #   Lead_Region &lt;chr&gt;, Federal_Listing_Status &lt;chr&gt;, Special_Rules &lt;chr&gt;,
-#&gt; #   U.S._or_ForeignListed &lt;chr&gt;, Where_Listed &lt;chr&gt;, Species_Page &lt;chr&gt;</div></pre>
+#&gt;   Critical_Habitat       Species_Group Lead_Region Federal_Listing_Status
+#&gt; 1              N/A Conifers and Cycads     Foreign             Threatened
+#&gt; 2              N/A    Flowering Plants           2             Endangered
+#&gt; 3         17.96(a)    Flowering Plants           1             Endangered
+#&gt; 4              N/A    Flowering Plants           1             Endangered
+#&gt; 5         17.96(a)    Flowering Plants           1             Endangered
+#&gt; 6         17.96(a)    Flowering Plants           1             Endangered
+#&gt;   Special_Rules U_S__or_ForeignListed   Where_Listed
+#&gt; 1           N/A               Foreign Wherever found
+#&gt; 2           N/A                    US Wherever found
+#&gt; 3           N/A                    US Wherever found
+#&gt; 4           N/A                    US Wherever found
+#&gt; 5           N/A                    US Wherever found
+#&gt; 6           N/A                    US Wherever found
+#&gt;                                                                Species_Page
+#&gt; 1 http://ecos.fws.gov/tess_public/profile/speciesProfile.action?spcode=R003
+#&gt; 2 http://ecos.fws.gov/tess_public/profile/speciesProfile.action?spcode=Q24E
+#&gt; 3 http://ecos.fws.gov/tess_public/profile/speciesProfile.action?spcode=Q1SJ
+#&gt; 4 http://ecos.fws.gov/tess_public/profile/speciesProfile.action?spcode=Q1SK
+#&gt; 5 http://ecos.fws.gov/tess_public/profile/speciesProfile.action?spcode=Q1SL
+#&gt; 6 http://ecos.fws.gov/tess_public/profile/speciesProfile.action?spcode=Q1SM</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>

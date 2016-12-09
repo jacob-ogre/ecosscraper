@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Get a summary data.frame of an ECOS page scrape — get_species_page_summary • ecosscraper</title>
+<title>Get a summary of an ECOS page scrape — get_species_page_summary • ecosscraper</title>
 
 <!-- jquery -->
 <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script>
@@ -77,7 +77,7 @@
       <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Get a summary data.frame of an ECOS page scrape</h1>
+    <h1>Get a summary of an ECOS page scrape</h1>
     </div>
 
     
@@ -96,9 +96,20 @@ In those cases, the page can be specified to save time.</p>
       <dd>The scientific name of the species</dd>
       <dt>pause</dt>
       <dd>Pause for 0.5-3s during scraping [default = TRUE]</dd>
-      <dt>pg</dt>
-      <dd>An ECOS species page from <a href='get_species_page.html'>get_species_page</a></dd>
     </dl>
+    
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+
+    <p>A data_frame with four variables: <ul>
+<li>Species
+  </li>
+<li>Page
+  </li>
+<li>Scrape_Date
+  </li>
+<li>Page_Text_MD5
+</li>
+</ul></p>
     
     <h2 class="hasAnchor" id="note"><a class="anchor" href="#note"></a>Note</h2>
 
@@ -114,6 +125,8 @@ get clean lines, then sort before doing the MD5 hash.</p>
     <ul class="nav nav-pills nav-stacked">
       <li><a href="#arguments">Arguments</a></li>
       
+      <li><a href="#value">Value</a></li>
+
       <li><a href="#note">Note</a></li>
           </ul>
 

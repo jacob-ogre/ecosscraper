@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Set the base directory for ecosscraper downloads. — set_base_dir • ecosscraper</title>
+<title>Get links to documents on a section 10 conservation plan page — get_conservation_plan_doc_links • ecosscraper</title>
 
 <!-- jquery -->
 <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script>
@@ -77,28 +77,34 @@
       <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Set the base directory for ecosscraper downloads.</h1>
+    <h1>Get links to documents on a section 10 conservation plan page</h1>
     </div>
 
     
-    <p>Creates the directory, recursively, if it doesn&#39;t exist.</p>
+    <p>Get links to documents on a section 10 conservation plan page</p>
     
 
-    <pre><span class='fu'>set_base_dir</span>(<span class='no'>path</span>)</pre>
+    <pre><span class='fu'>get_conservation_plan_doc_links</span>(<span class='no'>url</span>, <span class='no'>species</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
     <dl class="dl-horizontal">
-      <dt>path</dt>
-      <dd>Path to base directory for downloads from ECOS</dd>
+      <dt>url</dt>
+      <dd>The URL of the summary page for a section 10 conservation plan</dd>
+      <dt>species</dt>
+      <dd>The species from whose ECOS page the plan URL was gathered</dd>
     </dl>
     
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>Nothing</p>
+    <p>A data_frame of links to agreement documents</p>
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='fu'>set_base_dir</span>(<span class='kw'>path</span> <span class='kw'>=</span> <span class='st'>"~/Downloads/test5"</span>)</div></pre>
+    <pre class="examples"><div class='input'><span class='co'>## Not run: ------------------------------------</span>
+<span class='co'>#   url &lt;- "https://ecos.fws.gov/conserv_plans/conservationPlan/plan?plan_id=1470"</span>
+<span class='co'>#   conplan_docs &lt;- get_conservation_plan_doc_links(url, </span>
+<span class='co'>#                                                   "Ursus arctos horribilis")</span>
+<span class='co'>## ---------------------------------------------</span></div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
