@@ -4,12 +4,14 @@
 \alias{download_species_page}
 \title{Download a species' ECOS page}
 \usage{
-download_species_page(url, file)
+download_species_page(url, file, overwrite = FALSE)
 }
 \arguments{
 \item{url}{The URL of the HTML page to download}
 
 \item{file}{The file to which the HTML will be written}
+
+\item{overwrite}{Whether to overwrite pre-existing file}
 }
 \value{
 A data_frame with four variables: \describe{
