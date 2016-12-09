@@ -17,7 +17,13 @@
 #'   get_species_url("Helianthus paradoxus") %>% 
 #'     download_species_page("~/Downloads/HELPAR_2016-12-08.html")
 #' }
-download_species_page <- function(url, file) {
+download_species_page <- function(url, file, overwrite = FALSE) {
+  if(file.exists(file) & !overwrite) {
+      return(data_frame(url = url,
+                        dest = NA,
+                        success = "Pre-exist",
+                        htmlCheck = NA))
+  }
   url <- URLencode(url)
   subd <- dirname(file)
   if(!dir.exists(subd)) dir.create(subd, recursive = TRUE)
