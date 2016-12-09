@@ -4,30 +4,31 @@
 \alias{get_conservation_plan_data}
 \title{Get data linked to a section 10 conservation plan}
 \usage{
-get_conservation_plan_data(url)
+get_conservation_plan_data(url, species)
 }
 \arguments{
 \item{url}{The URL of the summary page for a section 10 conservation plan}
+
+\item{species}{The species from whose ECOS page the plan URL was gathered}
 }
 \value{
-A list of two items \describe{
-  \item{table}{A data_frame of summary data about the agreement}
-  \item{pdfs}{A data_frame of links to agreement documents}
-}
+A data_frame of summary data about the agreement or NULL
 }
 \description{
 Get data linked to a section 10 conservation plan
 }
 \details{
-This function returns two distinct items, a table of summary data
-and a table of linked documents. Most other functions in the package should
-return a single item, but rather than visiting the conservation plan page 
-twice, we get both pieces of content at the same time.
+The ECOS pages for conservation plans include covered species,
+(\code{Listed_Species / Non-Listed_Species}), but those "lists" are just a
+concatenation of common names, scientific names, where listed, etc. The
+\code{species} parameter is used to tie outgoing links from a species' ECOS
+page to the summary data. These can later be checked to make sure that all
+covered species listed on the plan page are linked to the species' page.
 }
 \examples{
 \dontrun{
   url <- "https://ecos.fws.gov/conserv_plans/conservationPlan/plan?plan_id=1470"
-  URARHO <- get_conservation_plan_table(url)
+  URARHO <- get_conservation_plan_data(url, "Ursus arctos horribilis")
 }
 }
 

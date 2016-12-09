@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{get_species_page_summary}
 \alias{get_species_page_summary}
-\title{Get a summary data.frame of an ECOS page scrape}
+\title{Get a summary of an ECOS page scrape}
 \usage{
 get_species_page_summary(url, species, pause = TRUE)
 }
@@ -12,8 +12,14 @@ get_species_page_summary(url, species, pause = TRUE)
 \item{species}{The scientific name of the species}
 
 \item{pause}{Pause for 0.5-3s during scraping [default = TRUE]}
-
-\item{pg}{An ECOS species page from \link{get_species_page}}
+}
+\value{
+A \link[tidyr]{data_frame} with four variables: \itemize{
+  \item{Species}
+  \item{Page}
+  \item{Scrape_Date}
+  \item{Page_Text_MD5}
+}
 }
 \description{
 By default, \code{get_species_page_summary} will fetch the species' ECOS page

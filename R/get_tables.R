@@ -66,11 +66,11 @@ get_table <- function(tab) {
 # @param species The scientific name to be included in the returned data.frame
 # @return A data.frame with URL, if tab includes a Title variable
 join_for_links <- function(tab, links, species) {
-  print(species)
   if(!is.null(tab) & dim(tab)[1] > 0) {
     if("Lead Region" %in% names(tab)) {
       tab$Species <- rep(species, length(tab[[1]]))
-      tab$Status <- str_extract(tab$Status, pattern = '[A-Za-z, -]+$')
+      tab$Status <- str_extract(tab$Status, pattern = '\\([A-Za-z, -\\"]+\\)')
+      tab$Status <- gsub(tab$Status, pattern = '\\(\\"|\\"\\)', replacement = "")
       return(tab)
     } else if("Title" %in% names(tab)) {
       res <- left_join(tab, links, by = "Title")
@@ -141,7 +141,7 @@ get_table_type <- function(df) {
   if(is.null(names(df))) {
     return("UNK_TAB")
   } else if(all(names(df) == SP_TAB)) {
-    return("SP_TAB") 
+    return("SP_TAB")
   } else if(all(names(df) == FR_TAB)) {
     return("FR_TAB")
   } else if(all(names(df) == CH_TAB)) {
@@ -224,10 +224,9 @@ get_recovery_table <- function() {
       new_df <- left_join(newt, atag_df, by = "Plan_Name")
       new_df <- distinct(new_df, Scientific_Name, Where_Listed, Plan_Name,
                          .keep_all = TRUE)
-      new_df <- data.frame(new_df[, 1:4],
+      new_df <- data_frame(new_df[, 1:4],
                            Plan_URL = new_df$Plan_URL,
-                           new_df[, 5:8],
-                           stringsAsFactors = FALSE)
+                           new_df[, 5:8])
       new_df <- as_data_frame(new_df)
       return(new_df)
     }

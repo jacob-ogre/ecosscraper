@@ -52,16 +52,16 @@ remove_silly_links <- function(df, patterns = list()) {
   return(filt)
 }
 
-#' Get a data.frame of links and their titles from a web page
-#' 
-#' @export
+# Get a data.frame of links and their titles from a web page
 get_link_df <- function(pg) {
   a_nodes <- html_nodes(pg, "a")
   pg_links <- html_attr(a_nodes, "href")
+  pg_links <- ifelse(grepl(pg_links, pattern = "^http|^www"),
+                     pg_links,
+                     paste0("http://ecos.fws.gov", pg_links))
   link_txt <- html_text(a_nodes)
-  link_tbl <- data.frame(Doc_Link = pg_links, 
-                         Title = str_trim(link_txt),
-                         stringsAsFactors = FALSE)
+  link_tbl <- data_frame(Doc_Link = pg_links, 
+                         Title = str_trim(link_txt))
   return(link_tbl)
 } 
 
@@ -73,7 +73,7 @@ set_TE_list_opt <- function(url) {
   options("TE_list" = url)
 }
 
-#' Get a summary data.frame of an ECOS page scrape
+#' Get a summary of an ECOS page scrape
 #'
 #' By default, \code{get_species_page_summary} will fetch the species' ECOS page
 #' given the URL, but there may be times when the page has already been fetched.
@@ -86,13 +86,19 @@ set_TE_list_opt <- function(url) {
 #'
 #' @param url The url of the species page
 #' @param species The scientific name of the species
-#' @param pg An ECOS species page from \link{get_species_page}
 #' @param pause Pause for 0.5-3s during scraping [default = TRUE]
+#' @return A \link[tidyr]{data_frame} with four variables: \itemize{
+#'   \item{Species}
+#'   \item{Page}
+#'   \item{Scrape_Date}
+#'   \item{Page_Text_MD5}
+#' }
 #' @export
 get_species_page_summary <- function(url, species, pause = TRUE) {
   if(grepl(url, pattern = "^http|^www")) {
     pg <- get_species_page(url)
   } else {
+    if(pause) Sys.sleep(runif(1, 0, 3))
     pg <- xml2::read_html(url)
   }
   page_txt <- html_text(pg)
@@ -100,11 +106,10 @@ get_species_page_summary <- function(url, species, pause = TRUE) {
   page_txt <- unlist(str_trim(page_txt))
   page_txt <- sort(page_txt)
   md5_hash <- digest(page_txt)
-  tab_1 <- data.frame(Species = species,
+  tab_1 <- data_frame(Species = species,
                       Page = url,
                       Scrape_Date = Sys.Date(),
-                      Page_Text_MD5 = md5_hash,
-                      stringsAsFactors = FALSE)
+                      Page_Text_MD5 = md5_hash)
   return(tab_1)
 }
 

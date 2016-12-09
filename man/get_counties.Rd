@@ -4,10 +4,12 @@
 \alias{get_counties}
 \title{Get the table of counties of occurrence from ECOS}
 \usage{
-get_counties(url)
+get_counties(url, species)
 }
 \arguments{
 \item{url}{The URL of the counties-of-occurrence page for a species}
+
+\item{species}{The scientific name of the species}
 }
 \value{
 A data_frame of counties of occurrence provided by ECOS
