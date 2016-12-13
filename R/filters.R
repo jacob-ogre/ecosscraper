@@ -10,10 +10,10 @@
 #' @importFrom dplyr filter
 #' @export
 filter_domestic <- function(df) {
-  if(!("U_S__or_ForeignListed" %in% names(df))) {
-    stop("Expects a data.fram from get_TECP_table.")
+  if(!("U.S._or_ForeignListed" %in% names(df))) {
+    stop("Expects a data.frame from get_TECP_table.")
   }
-  filt <- dplyr::filter(df, U_S__or_ForeignListed != "Foreign")
+  filt <- dplyr::filter(df, U.S._or_ForeignListed != "Foreign")
   return(filt)
 }
 
@@ -30,7 +30,7 @@ filter_domestic <- function(df) {
 #' @export
 filter_listed <- function(df) {
   if(!("Federal_Listing_Status" %in% names(df))) {
-    stop("Expects a data.fram from get_TECP_table.")
+    stop("Expects a data.frame from get_TECP_table.")
   }
   filt <- dplyr::filter(df, Federal_Listing_Status == "Threatened" |
                           Federal_Listing_Status == "Endangered")
@@ -67,7 +67,7 @@ filter_listed <- function(df) {
 #' @export
 filter_taxa <- function(df, group = c()) {
   if(!("Species_Group" %in% names(df))) {
-    stop("Expects a data.fram from get_TECP_table.")
+    stop("Expects a data.frame from get_TECP_table.")
   }
   filt <- dplyr::filter(df, Species_Group %in% group)
   return(filt)
