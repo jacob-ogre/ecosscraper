@@ -7,7 +7,7 @@
 #' for the documents, so we have to scrape the contents.
 #' 
 #' @importFrom digest digest
-#' @importFrom dplyr bind_rows distinct filter_ filter left_join select
+#' @importFrom dplyr bind_rows distinct filter_ filter left_join select %>%
 #' @importFrom httr GET http_error write_disk content
 #' @importFrom magrittr %>%
 #' @importFrom parallel mclapply
