@@ -14,7 +14,7 @@
 #' @importFrom pdfdown download_pdf
 #' @importFrom rvest html_attr html_node html_nodes html_table html_text
 #' @importFrom stringr str_trim str_split str_extract
-#' @importFrom tibble data_frame
+#' @importFrom tibble data_frame as_data_frame
 #' @importFrom webshot install_phantomjs
 #' @importFrom xml2 read_html
 #' @docType package
