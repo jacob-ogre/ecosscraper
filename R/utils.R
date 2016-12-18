@@ -139,3 +139,21 @@ get_species_tsn <- function(url) {
   text <- str_extract(text, "[0-9]+")
   return(text)
 }
+
+
+#' Clean a file name
+#' 
+#' @param f The character string of a file name
+#' @export
+#' @examples
+#' \dontrun{
+#'   clean_fname("this&that are (good).pdf")
+#' }
+clean_fname <- function(f) {
+  cleannm <- basename(f) %>%
+    gsub(pattern = " ", replacement = "_") %>%
+    gsub(pattern = "&", replacement = "and") %>%
+    gsub(pattern = "\\(|\\)", replacement = "") %>%
+    gsub(pattern = "\\,", replacement = "")
+  return(cleannm)
+}
