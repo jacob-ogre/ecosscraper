@@ -140,7 +140,6 @@ get_species_tsn <- function(url) {
   return(text)
 }
 
-
 #' Clean a file name
 #' 
 #' @param f The character string of a file name

@@ -16,14 +16,14 @@
 get_species_tables <- function(url, verbose = TRUE) {
   check_load()
   if(grepl(url, pattern = "^http|^www")) {
-    sp_dat <- filter(TECP_table, Species_Page == url)
-    species <- unique(sp_dat$Scientific_Name)
+    sp_dat <- filter(TECP_table, species_page == url)
+    species <- unique(sp_dat$species)
     cur_page <- get_species_page(url, verbose = verbose)
     if(is.null(cur_page)) return(NULL)
   } else {
     sp_code <- strsplit(basename(url), split = "_")[[1]][1]
-    sp_dat <- filter(TECP_table, Species_Code == sp_code)
-    species <- unique(sp_dat$Scientific_Name)
+    sp_dat <- filter(TECP_table, species_code == sp_code)
+    species <- unique(sp_dat$species)
     cur_page <- xml2::read_html(url)
   }
   if(verbose) message(paste("Getting tables for", species))
@@ -137,7 +137,7 @@ get_table_type <- function(df) {
                "Species")
   REV_TAB <- c("Date", "Title", "Doc_Link", "Species")
   PET_TAB <- "Petition Title"
-
+  
   if(is.null(names(df))) {
     return("UNK_TAB")
   } else if(all(names(df) == SP_TAB)) {
