@@ -86,8 +86,10 @@ fill_link <- function(x, base_ln) {
 #   get_species_page() %>%
 #   is_species_profile()
 is_species_profile <- function(page) {
-  text <- rvest::html_text(page)
-  if(grepl(text, pattern = "No species profile", ignore.case = TRUE)) {
+  text <- try(rvest::html_text(page))
+  if(class(text) == "try-error") {
+    return(FALSE)
+  } else if(grepl(text, pattern = "No species profile", ignore.case = TRUE)) {
     return(FALSE)
   }
   return(TRUE)

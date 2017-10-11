@@ -52,4 +52,3 @@ at the cost of substantially larger (and perhaps more confusing) dfs.
            get_petitions_table()
 }
 }
-

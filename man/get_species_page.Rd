@@ -32,4 +32,3 @@ functions are \code{verbose} by default.
   page <- get_species_url("Abies guatemalensis") \%>\% get_species_page()
 }
 }
-

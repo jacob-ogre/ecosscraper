@@ -20,4 +20,3 @@ Return the profile page on ECOS for a given species
 \examples{
 get_species_url("Gila purpurea")
 }
-

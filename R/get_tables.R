@@ -2,7 +2,8 @@
 
 #' Get all tables from a species' ECOS page
 #'
-#' @param url The path to the species' ECOS page
+#' @param url The path to the species' ECOS page; alternative to page
+#' @param page An HTML page; alternative to url
 #' @param verbose Print a message about tables being fetched [default = TRUE]
 #' @return A list of tables, named per \link{get_table_type}, and one
 #'   table (\code{scrape_info}) that records information about the scrape
@@ -13,18 +14,30 @@
 #'   tabs <- get_species_tables(TECP_domestic$Species_Page[1])
 #'   tab2 <- get_species_url("Abies guatemalensis") %>% get_species_tables()
 #' }
-get_species_tables <- function(url, verbose = TRUE) {
+get_species_tables <- function(url = NULL, page = NULL, 
+                               species = NULL, verbose = TRUE) {
   check_load()
-  if(grepl(url, pattern = "^http|^www")) {
-    sp_dat <- filter(TECP_table, species_page == url)
-    species <- unique(sp_dat$species)
-    cur_page <- get_species_page(url, verbose = verbose)
-    if(is.null(cur_page)) return(NULL)
+  if(!is.null(url)) {
+    if(grepl(url, pattern = "^http|^www")) {
+      sp_dat <- filter(TECP_table, species_page == url)
+      species <- unique(sp_dat$species)
+      cur_page <- get_species_page(url, verbose = verbose)
+      if(is.null(cur_page)) return(NULL)
+    } else {
+      sp_code <- strsplit(basename(url), split = "_")[[1]][1]
+      sp_dat <- filter(TECP_table, species_code == sp_code)
+      species <- unique(sp_dat$species)
+      cur_page <- xml2::read_html(url)
+    }
+  } else if(!is.null(page)) {
+    if(is.null(species)) stop("Species must be specified.")
+    if(class(page) == "character") {
+      cur_page <- xml2::read_html(page)
+    } else {
+      cur_page <- page
+    }
   } else {
-    sp_code <- strsplit(basename(url), split = "_")[[1]][1]
-    sp_dat <- filter(TECP_table, species_code == sp_code)
-    species <- unique(sp_dat$species)
-    cur_page <- xml2::read_html(url)
+    stop("Either a URL or an HTML page is required.")
   }
   if(verbose) message(paste("Getting tables for", species))
   p_tables <- html_nodes(cur_page, "table")
@@ -39,11 +52,11 @@ get_species_tables <- function(url, verbose = TRUE) {
   return(tab_upd)
 }
 
-# Return a table from an ECOS page
-#
-# @param tab A table from an rvest::html_nodes object
-# @return The table as a data.frame
-# @seealso \link{get_tables}
+#' Return a table from an ECOS page
+#'
+#' @param tab A table from an rvest::html_nodes object
+#' @return The table as a data.frame
+#' @seealso \link{get_tables}
 get_table <- function(tab) {
   res <- try(suppressWarnings(html_table(tab, fill = TRUE)), silent = TRUE)
   if(class(res) != "try-error") {
@@ -53,18 +66,18 @@ get_table <- function(tab) {
   }
 }
 
-# Join an ECOS table of text with the links to documents
-# 
-# Extracting tables with links in cells using rvest isn't straight-forward.
-# But by listing the links with \code{html_nodes(..., "href")} and the link 
-# text with \code{html_text(...)} (i.e., the link title), then joining with the 
-# table Title field, we can associate every doc link with the other fields in 
-# the table.
-#
-# @param tab The table (as a data.frame) to be joined if it has a Title var
-# @param links A data.frame with the Title of the link and the URL
-# @param species The scientific name to be included in the returned data.frame
-# @return A data.frame with URL, if tab includes a Title variable
+#' Join an ECOS table of text with the links to documents
+#' 
+#' Extracting tables with links in cells using rvest isn't straight-forward.
+#' But by listing the links with \code{html_nodes(..., "href")} and the link 
+#' text with \code{html_text(...)} (i.e., the link title), then joining with the 
+#' table Title field, we can associate every doc link with the other fields in 
+#' the table.
+#'
+#' @param tab The table (as a data.frame) to be joined if it has a Title var
+#' @param links A data.frame with the Title of the link and the URL
+#' @param species The scientific name to be included in the returned data.frame
+#' @return A data.frame with URL, if tab includes a Title variable
 join_for_links <- function(tab, links, species) {
   if(!is.null(tab) & dim(tab)[1] > 0) {
     if("Lead Region" %in% names(tab)) {
@@ -75,6 +88,7 @@ join_for_links <- function(tab, links, species) {
     } else if("Title" %in% names(tab)) {
       res <- left_join(tab, links, by = "Title")
       res$Species <- rep(species, length(res[[1]]))
+      res <-  distinct(res, Species, Title, .keep_all = TRUE)
       return(res)
     } else if("HCP Plan Summaries" %in% names(tab)) {
       res <- left_join(tab, links, by = c("HCP Plan Summaries" = "Title"))
@@ -137,6 +151,10 @@ get_table_type <- function(df) {
                "Species")
   REV_TAB <- c("Date", "Title", "Doc_Link", "Species")
   PET_TAB <- "Petition Title"
+  HCP_TAB <- "HCP Plan Summaries"
+  SHA_TAB <- "SHA Plan Summaries"
+  CCA_TAB <- "CCA Plan Summaries"
+  CCAA_TAB <- "CCAA Plan Summaries"
   
   if(is.null(names(df))) {
     return("UNK_TAB")
@@ -154,6 +172,14 @@ get_table_type <- function(df) {
     return("REV_TAB")
   } else if(PET_TAB %in% names(df)) {
     return("PET_TAB")
+  } else if(HCP_TAB %in% names(df)) {
+    return("HCP_TAB")
+  } else if(SHA_TAB %in% names(df)) {
+    return("SHA_TAB")
+  } else if(CCA_TAB %in% names(df)) {
+    return("CCA_TAB")
+  } else if(CCAA_TAB %in% names(df)) {
+    return("CCAA_TAB")
   } else {
     return(names(df)[1])
   }

@@ -13,4 +13,3 @@ Find the phantomjs binary
 This is taken directly from \link[webshot]{webshot}, where 
 \code{find_phantomjs} is a non-exported function.
 }
-

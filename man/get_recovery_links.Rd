@@ -20,4 +20,3 @@ Get the links for recovery plans on ECOS species' pages
                 get_species_links() \%>\%
                 get_recovery_links()
 }
-

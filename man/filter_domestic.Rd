@@ -22,4 +22,3 @@ Expects a data.frame from get_TECP_table. The df may have already
 passed through another filter (e.g., filter_listed), but must contain the 
 variable \code{U_S__or_ForeignListed}.
 }
-

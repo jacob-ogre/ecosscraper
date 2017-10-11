@@ -17,4 +17,3 @@ Clean a file name
   clean_fname("this&that are (good).pdf")
 }
 }
-

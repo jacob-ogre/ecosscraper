@@ -40,4 +40,3 @@ Expects a data.frame from get_TECP_table. The df may have already
 passed through another filter (e.g., filter_domestic), but must contain the 
 variable \code{Species_Group}.
 }
-

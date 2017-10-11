@@ -36,4 +36,3 @@ agmt <- get_species_url("Gila purpurea") \%>\%
           get_agmt_type_links(type = "HCP")
 }
 }
-

@@ -18,4 +18,3 @@ Download an image file
 Just a wrapper around \link[httr]{GET} with several checks to make
 downloads more likely / robust.
 }
-

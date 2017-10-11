@@ -4,10 +4,13 @@
 \alias{get_species_tables}
 \title{Get all tables from a species' ECOS page}
 \usage{
-get_species_tables(url, verbose = TRUE)
+get_species_tables(url = NULL, page = NULL, species = NULL,
+  verbose = TRUE)
 }
 \arguments{
-\item{url}{The path to the species' ECOS page}
+\item{url}{The path to the species' ECOS page; alternative to page}
+
+\item{page}{An HTML page; alternative to url}
 
 \item{verbose}{Print a message about tables being fetched [default = TRUE]}
 }
@@ -27,4 +30,3 @@ Get all tables from a species' ECOS page
 \seealso{
 \link{get_table}, \link{get_table_type}
 }
-

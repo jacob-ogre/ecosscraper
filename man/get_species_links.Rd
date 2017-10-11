@@ -39,4 +39,3 @@ Either \code{url} or \code{page} must be specified.
 \seealso{
 \link{remove_silly_links} \link{get_bulk_species_links}
 }
-

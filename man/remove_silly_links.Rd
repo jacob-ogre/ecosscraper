@@ -21,4 +21,3 @@ species pages, but additional link patterns to be removed can be added using
 the optional \code{patterns} parameter, with the patterns using regex 
 expressions expected by \link{grepl}.
 }
-

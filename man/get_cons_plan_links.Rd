@@ -22,4 +22,3 @@ Get the links to conservation plan pages on ECOS species' pages
     get_cons_plan_links()
 }
 }
-

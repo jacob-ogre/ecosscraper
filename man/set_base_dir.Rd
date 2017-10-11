@@ -18,4 +18,3 @@ Creates the directory, recursively, if it doesn't exist.
 \examples{
 set_base_dir(path = "~/Downloads/test5")
 }
-

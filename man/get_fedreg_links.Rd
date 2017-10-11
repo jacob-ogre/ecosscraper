@@ -20,4 +20,3 @@ Get the links for Federal Register documents on ECOS species' pages
                get_species_links() \%>\%
                get_fedreg_links()
 }
-

@@ -4,12 +4,12 @@
 \alias{get_conservation_plan_data}
 \title{Get data linked to a section 10 conservation plan}
 \usage{
-get_conservation_plan_data(url, species)
+get_conservation_plan_data(url = NULL, pg = NULL)
 }
 \arguments{
 \item{url}{The URL of the summary page for a section 10 conservation plan}
 
-\item{species}{The species from whose ECOS page the plan URL was gathered}
+\item{pg}{An html page (character) of a section 10 conservation plan}
 }
 \value{
 A data_frame of summary data about the agreement or NULL
@@ -27,8 +27,7 @@ covered species listed on the plan page are linked to the species' page.
 }
 \examples{
 \dontrun{
-  url <- "https://ecos.fws.gov/conserv_plans/conservationPlan/plan?plan_id=1470"
-  URARHO <- get_conservation_plan_data(url, "Ursus arctos horribilis")
+  grizz <- "https://ecos.fws.gov/ecp0/conservationPlan/plan?plan_id=1470"
+  URARHO <- get_conservation_plan_data(grizz)
 }
 }
-

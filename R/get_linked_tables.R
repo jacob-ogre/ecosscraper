@@ -42,39 +42,45 @@ get_counties <- function(url, species) {
 #' covered species listed on the plan page are linked to the species' page.
 #' 
 #' @param url The URL of the summary page for a section 10 conservation plan
-#' @param species The species from whose ECOS page the plan URL was gathered
+#' @param pg An html page (character) of a section 10 conservation plan
 #' @return A data_frame of summary data about the agreement or NULL
 #' @export
 #' @examples
 #' \dontrun{
-#'   url <- "https://ecos.fws.gov/conserv_plans/conservationPlan/plan?plan_id=1470"
-#'   URARHO <- get_conservation_plan_data(url, "Ursus arctos horribilis")
+#'   grizz <- "https://ecos.fws.gov/ecp0/conservationPlan/plan?plan_id=1470"
+#'   URARHO <- get_conservation_plan_data(grizz)
 #' }
-get_conservation_plan_data <- function(url, species) {
-  url <- gsub(url, pattern = "conserv_plans", replacement = "ecp0")
-  url <- URLencode(url)
-  con <- try(http_error(url), silent = TRUE)
-  if(class(con) != "try-error") {
-    pg <- try(xml2::read_html(url))
-    if(class(pg)[1] != "try-error") {
-      tabs <- html_table(pg, fill = TRUE)
-      tab <- bind_rows(tabs)
-      names(tab) <- c("Variable", "Value")
-      rownames(tab) <- gsub(
-                         gsub(tab$Variable,
-                              pattern = " |/",
-                              replacement = "_"),
-                         pattern = "\\(|\\)",
-                         replacement = "")
-      tab <- as_data_frame(t(tab))
-      tab <- tab[-1, ]
-      tab$Plan_Name <- html_text(html_nodes(pg, "h3")[1])
-      tab$Scientific_Name <- species
-      return(tab)
+get_conservation_plan_data <- function(url = NULL, pg = NULL) {
+  if(!is.null(pg)) {
+    pg <- try(xml2::read_html(pg))
+  } else if(!is.null(url)) {
+    url <- gsub(url, pattern = "conserv_plans", replacement = "ecp0")
+    url <- URLencode(url)
+    con <- try(http_error(url), silent = TRUE)
+    if(class(con) != "try-error") {
+      pg <- try(xml2::read_html(url))
     } else {
       warning("read_html error; check URL and try again later.")
       return(NULL)
     }
+  } else {
+    warning("Either url or pg (page obj) must be specified. Try again.")
+    return(NULL)
+  }
+  if(class(pg)[1] != "try-error") {
+    tab <- html_table(pg, fill = TRUE) %>% bind_rows()
+    names(tab) <- c("Variable", "Value")
+    rownames(tab) <- gsub(
+                       gsub(tab$Variable,
+                            pattern = " |/",
+                            replacement = "_"),
+                       pattern = "\\(|\\)",
+                       replacement = "")
+    tab <- as_data_frame(t(tab))
+    tab <- tab[-1, ]
+    tab$Plan_Name <- html_text(html_nodes(pg, "h3")[1])
+    tab$plan_url <- ifelse(is.null(url), NA, url)
+    return(tab)
   } else {
     warning("http_error; check URL and try again later.")
     return(NULL)
@@ -84,41 +90,124 @@ get_conservation_plan_data <- function(url, species) {
 #' Get links to documents on a section 10 conservation plan page
 #' 
 #' @param url The URL of the summary page for a section 10 conservation plan
-#' @param species The species from whose ECOS page the plan URL was gathered
+#' @param pg An html page (character) of a section 10 conservation plan
 #' @return A data_frame of links to agreement documents
 #' @export
-#' @examples
-#' \dontrun{
-#'   url <- "https://ecos.fws.gov/conserv_plans/conservationPlan/plan?plan_id=1470"
-#'   conplan_docs <- get_conservation_plan_doc_links(url, 
-#'                                                   "Ursus arctos horribilis")
-#' }
-get_conservation_plan_doc_links <- function(url, species) {
-  url <- gsub(url, pattern = "conserv_plans", replacement = "ecp0")
-  url <- URLencode(url)
-  if(class(try(http_error(url), silent = TRUE)) != "try-error") {
-    pg <- try(xml2::read_html(url))
-    if(class(pg)[1] != "try-error") {
-      atags <- html_nodes(pg, "a")
-      hrefs <- html_attr(atags, "href")
-      hrefs <- ifelse(grepl(hrefs, pattern = "^http"),
-                      hrefs,
-                      paste0("http://ecos.fws.gov", hrefs))
-      texts <- html_text(atags)
-      links <- data_frame(url = hrefs,
-                          text = texts)
-      links <- filter(links, grepl(links$url, pattern = "pdf|PDF"))
-      plname <- html_text(html_nodes(pg, "h3")[1])
-      links$Plan_Name <- rep(plname, length(links$url))
-      links$Scientific_Name <- rep(species, length(links$url))
-      return(links)
+get_conservation_plan_doc_links <- function(url = NULL, pg = NULL) {
+  if(!is.null(pg)) {
+    pg <- xml2::read_html(pg)
+  } else if(!is.null(url)) {
+    url <- gsub(url, pattern = "conserv_plans", replacement = "ecp0")
+    url <- URLencode(url)
+    if(class(try(http_error(url), silent = TRUE)) != "try-error") {
+      pg <- try(xml2::read_html(url))
     } else {
       warning("read_html error; check URL and try again later.")
       return(NULL)
+    } 
+  }
+  if(class(pg)[1] != "try-error") {
+    atags <- html_nodes(pg, "a")
+    hrefs <- html_attr(atags, "href")
+    hrefs <- ifelse(grepl(hrefs, pattern = "^http"),
+                    hrefs,
+                    paste0("http://ecos.fws.gov", hrefs))
+    texts <- html_text(atags)
+    links <- data_frame(
+      url = hrefs,
+      text = texts
+    )
+    links <- filter(links, grepl(links$url, pattern = "pdf|PDF"))
+    if(dim(links)[1] == 0) {
+      links <- data_frame(
+        url = c(NA),
+        text = c(NA)
+      )
     }
+    plname <- html_text(html_nodes(pg, "h3")[1])
+    links$Plan_Name <- plname
+    links$plan_url <- ifelse(is.null(url), NA, url)
+    return(links)
   } else {
     warning("http_error; check URL and try again later.")
     return(NULL)
   }
 }
 
+#' Get table of species covered by a conservation plan
+#' 
+#' @param spp A character vector of covered species from a conservation plan's
+#'   data table, e.g., from get_conservation_plan_data
+#' @param plan_url The url for the conservation plan summary page; needed for 
+#'   JOINing with other cons. plan datasets
+#' @return A table of species by plan url, with one species per row
+#' @export
+get_conservation_plan_listed_species <- function(spp, plan_url) {
+  ls1 <- str_split(spp, "\n\n")
+  p1 <- str_split(ls1[[1]], " \n ")
+  p2 <- lapply(p1, str_replace, pattern = "^\n", replacement  = "")
+  names <- lapply(p2, function(x) {
+    str_split(x[1], "\n ")
+  }) %>% unlist(recursive = FALSE)
+  stats <- lapply(p2, function(x) {
+    str_split(x[2], "\n ")
+  }) %>% unlist(recursive = FALSE)
+  data_frame(
+    common_name = lapply(names, `[`, 1) %>% unlist(),
+    species = lapply(names, `[`, 2) %>%
+      str_replace("^\\(", "") %>%
+      str_replace("\\)$", "") %>%
+      unlist(),
+    population = lapply(stats, `[`, 1) %>% unlist(),
+    status = lapply(stats, `[`, 2) %>% unlist(),
+    plan_url = plan_url
+  )
+}
+
+#' Get table of non-listed species covered by a conservation plan
+#' 
+#' NOTE: we can't pull out just the scientific names of covered species because 
+#' of variation in how FWS records scientific names in the conservation plan 
+#' summary pages. \code{grepl} and other tools should be used to filter.
+#' 
+#' @param spp A character vector of covered species from a conservation plan's
+#'   data table, e.g., from get_conservation_plan_data
+#' @param plan_url The url for the conservation plan summary page; needed for 
+#'   JOINing with other cons. plan datasets
+#' @return A table of species by plan url, with one species per row
+#' @export
+get_conservation_plan_nonlisted_spp <- function(spp, plan_url) {
+  ul1 <- spp %>%  str_split("\n") %>% 
+    unlist(recursive = F) %>%
+    str_split("\\|")
+  codes <- lapply(ul1, `[[`, 1) %>% unlist()
+  spp_info <- lapply(ul1, function(x) {
+    ifelse(length(x) == 1, x, x[[2]])}) %>% unlist() %>%
+    str_split(" - ")
+  common_name <- lapply(spp_info, `[[`, 1)
+  sci_name_place <- lapply(spp_info, function(x) {
+    ifelse(length(x) == 1, x, x[[2]])
+  })
+  data_frame(
+    species_code = codes,
+    common_name = common_name,
+    sci_name_place = sci_name_place,
+    plan_url = plan_url
+  )
+}
+
+#' Get table of land use types per conservation plan
+#' 
+#' @param uses A character vector of covered species from a conservation plan's
+#'   data table, e.g., from get_conservation_plan_data
+#' @param plan_url The url for the conservation plan summary page; needed for 
+#'   JOINing with other cons. plan datasets
+#' @return A table of land use by plan url, with one land use per row
+#' @export
+get_conservation_plan_land_use <- function(uses, plan_url) {
+  ul1 <- uses %>% str_split("\n\n") %>% unlist()
+  data_frame(
+    land_use = ul1,
+    plan_url = plan_url
+  )
+}

@@ -15,4 +15,3 @@ this requires using the fork at \url{https://github.com/jacob-ogre/webshot}
 if you are using R version 3.3.2, at least until the pull request is merged
 into the main branch of \code{webshot}.
 }
-

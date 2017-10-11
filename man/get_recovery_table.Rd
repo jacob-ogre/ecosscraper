@@ -33,4 +33,3 @@ information variable.
   rec <- get_recovery_table()
 }
 }
-

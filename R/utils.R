@@ -42,7 +42,7 @@ get_species_url <- function(species) {
 remove_silly_links <- function(df, patterns = list()) {
   base_patt <- list("^#", "^javascript", "^http://www.fws.gov", 
                     "^http://www.usa.gov", "^http://www.doi.gov",
-                    "^/ecp/(help|about)$", "^/ecp$", "crithab$")
+                    "^/ecp[0]*/(help|about)$", "^/ecp$", "crithab$")
   patterns <- c(base_patt, patterns)
   filt <- filter(df, !is.na(href))
   for(i in patterns) {

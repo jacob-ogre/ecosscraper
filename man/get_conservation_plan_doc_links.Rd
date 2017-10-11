@@ -4,12 +4,12 @@
 \alias{get_conservation_plan_doc_links}
 \title{Get links to documents on a section 10 conservation plan page}
 \usage{
-get_conservation_plan_doc_links(url, species)
+get_conservation_plan_doc_links(url = NULL, pg = NULL)
 }
 \arguments{
 \item{url}{The URL of the summary page for a section 10 conservation plan}
 
-\item{species}{The species from whose ECOS page the plan URL was gathered}
+\item{pg}{An html page (character) of a section 10 conservation plan}
 }
 \value{
 A data_frame of links to agreement documents
@@ -17,11 +17,3 @@ A data_frame of links to agreement documents
 \description{
 Get links to documents on a section 10 conservation plan page
 }
-\examples{
-\dontrun{
-  url <- "https://ecos.fws.gov/conserv_plans/conservationPlan/plan?plan_id=1470"
-  conplan_docs <- get_conservation_plan_doc_links(url, 
-                                                  "Ursus arctos horribilis")
-}
-}
-

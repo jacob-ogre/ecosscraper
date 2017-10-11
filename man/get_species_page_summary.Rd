@@ -32,4 +32,3 @@ twice in a row. Instead, the same information will be presented in different
 orders. We have to use \code{strsplit} along with \link[stringr]{str_trim} to
 get clean lines, then sort before doing the MD5 hash.
 }
-

@@ -23,4 +23,3 @@ Get the table of counties of occurrence from ECOS
   URARHO <- get_counties(url)
 }
 }
-

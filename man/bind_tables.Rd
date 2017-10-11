@@ -18,4 +18,3 @@ Extract named tables from a list of tables extracted for >1 species
 \seealso{
 \link{get_tables}
 }
-
