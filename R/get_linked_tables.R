@@ -9,25 +9,26 @@
 #'   url <- "https://ecos.fws.gov/ecp0/profile/countiesBySpecies?entityId=2"
 #'   URARHO <- get_counties(url)
 #' }
-get_counties <- function(url, species) {
-  url <- URLencode(url)
-  if(!grepl(url, pattern = "countiesBySpecies")) {
-    warning("Expected a URL to a species' counties list.")
-    return(NULL)
-  }
-  con <- try(http_error(url), silent = TRUE)
-  if(class(con) != "try-error") {
-    pg <- try(xml2::read_html(url))
-    if(class(pg)[1] != "try-error") {
-      tab <- html_table(pg, fill = TRUE)[[1]]
-      tab$Scientific_Name <- rep(species, length(tab$State))
-      return(tab)
-    } else {
-      warning("read_html error; check URL and try again later.")
+get_counties <- function(url = NULL, page = NULL, species) {
+  if(is.null(page) & !is.null(url)) {
+    url <- URLencode(url)
+    if(!grepl(url, pattern = "countiesBySpecies")) {
+      warning("Expected a URL to a species' counties list.")
       return(NULL)
     }
+    con <- try(http_error(url), silent = TRUE)
+    if(class(con) != "try-error") {
+      pg <- try(xml2::read_html(url))
+    }
   } else {
-    warning("http_error; check URL and try again later.")
+    pg <- read_html(page)
+  }
+  if(class(pg)[1] != "try-error") {
+    tab <- html_table(pg, fill = TRUE)[[1]]
+    tab$Scientific_Name <- rep(species, length(tab$State))
+    return(tab)
+  } else {
+    warning("read_html error; check URL and try again later.")
     return(NULL)
   }
 }
@@ -210,4 +211,43 @@ get_conservation_plan_land_use <- function(uses, plan_url) {
     land_use = ul1,
     plan_url = plan_url
   )
+}
+
+#' Get a table of species covered by CCA/As
+#' 
+#' @param txt The text to be parsed
+#' @param url The url of the CCA/A plan summary data
+#' @export
+#' 
+get_cca_species <- function(txt, url) {
+  p1 <- str_split(txt, "\n\n\n") %>% unlist() %>% str_split("\n")
+  sp <- lapply(p1, `[[`, 1) %>% unlist() %>% str_split(" - ")
+  common <- lapply(sp, `[[`, 1) %>% unlist()
+  p2 <- try(lapply(sp, `[[`, 2) %>% unlist(), silent = TRUE)
+  if(class(p2) == "try-error") {
+    species <- c(NA)
+    popn <- c(NA)
+  } else {
+    species <- str_extract(p2, "\\([A-Za-z \\.\\(\\)=]+\\)") %>%
+      str_replace_all("^\\(|\\)$", "") %>% unlist()
+    popn <- str_replace(p2, "\\([A-Za-z \\.\\(\\)=]+\\)", "") %>% unlist()
+  }
+  
+  cur_stat <- try(lapply(p1, `[[`, 2) %>% unlist(), silent = TRUE)
+  if(class(cur_stat) == "try-error") {
+    cur_stat <- c(NA)
+  }
+  past_stat <- try(lapply(p1, `[[`, 3) %>% unlist(), silent = TRUE)
+  if(class(past_stat) == "try-error") {
+    past_stat <- c(NA)
+  }
+  result <- data_frame(
+    species = species,
+    common_name = common,
+    population = popn,
+    cur_esa_status = cur_stat,
+    past_esa_status = past_stat,
+    plan_url = url
+  )
+  return(result)
 }
