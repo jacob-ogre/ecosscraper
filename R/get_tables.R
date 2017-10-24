@@ -40,16 +40,58 @@ get_species_tables <- function(url = NULL, page = NULL,
     stop("Either a URL or an HTML page is required.")
   }
   if(verbose) message(paste("Getting tables for", species))
-  p_tables <- html_nodes(cur_page, "table")
-  tab_res <- lapply(p_tables, get_table)
-  tab_res <- Filter(function(x) !is.null(x), tab_res)
-  if(is.null(tab_res)) return(NULL)
+  tabs <- html_nodes(cur_page, "table")
+  tab2 <- lapply(tabs, get_table)
+  tab3 <- Filter(function(x) !is.null(x), tab2)
+  taba <- lapply(tabs, FUN = html_nodes, "a")
+  tabhref <- lapply(taba, FUN = html_attr, "href")
+  tabhref <- lapply(seq_along(tabhref), function(x) {
+    ifelse(
+      grepl(tabhref[[x]], pattern = "^http|^www"),
+      tabhref[[x]],
+      paste0("https://ecos.fws.gov", tabhref[[x]])
+    )
+  })
+  tabatxt <- lapply(taba, FUN = html_text)
   
-  link_tbl <- get_link_df(cur_page)
-  tab_upd <- lapply(tab_res, join_for_links, links = link_tbl, sp = species)
-  tab_names <- lapply(tab_upd, function(x) suppressWarnings(get_table_type(x)))
-  names(tab_upd) <- unlist(tab_names)
-  return(tab_upd)
+  tab_lns <- lapply(seq_along(tabhref), function(x) {
+    data_frame(
+      Doc_Link = tabhref[[x]],
+      atxt = tabatxt[[x]]
+    )
+  })
+  
+  all_tab <- lapply(seq_along(tab3), 
+                    FUN = join_hrefs, tab3, tab_lns, species)
+  tab_names <- lapply(all_tab, function(x) suppressWarnings(get_table_type(x)))
+  names(all_tab) <- unlist(tab_names)
+  if("SP_TAB" %in% names(all_tab)) {
+    all_tab[["SP_TAB"]]$Status <- gsub(
+      all_tab[["SP_TAB"]]$Status,
+      pattern = 'displayListingStatus\\(\\"|\\"\\)',
+      replacement = "")
+  }
+  return(all_tab)
+}
+
+join_hrefs <- function(x, tab3, tab_lns, species) {
+  if("Title" %in% names(tab3[[x]])) {
+    ftab <- left_join(tab3[[x]], tab_lns[[x]], by = c("Title" = "atxt"))
+  } else if("Status" %in% names(tab3[[x]])) {
+    ftab <- tab3[[x]]
+  } else if("Lead Region" %in% names(tab3[[x]])) {
+    ftab <- left_join(tab3[[x]], tab_lns[[x]], by = c("Lead Region" = "atxt"))
+  } else if(any(grepl(names(tab3[[x]]), pattern = "Plan Summaries"))) {
+    cur_col <- grep(names(tab3[[x]]), pattern = "Plan Summaries", value = TRUE)
+    names(tab3[[x]]) <- "atxt"
+    ftab <- left_join(tab3[[x]], tab_lns[[x]], by = "atxt")
+    names(ftab) <- c(cur_col, "doc_link")
+  } else {
+    ftab <- NULL
+  }
+  ftab$Species <- species
+  return(ftab)
+  
 }
 
 #' Return a table from an ECOS page
@@ -141,7 +183,8 @@ join_for_links <- function(tab, links, species) {
 #     \item{others}{One of several table types, e.g., HCP documents}
 #   }
 get_table_type <- function(df) {
-  SP_TAB <- c("Status", "Date Listed", "Lead Region", "Where Listed", "Species")
+  SP_TAB <- c("Status", "Date Listed", "Lead Region", "Where Listed", 
+              "Doc_Link", "Species")
   FR_TAB <- c("Date", "Citation Page", "Title", "Doc_Link", "Species")
   CH_TAB <- c("Date", "Citation Page", "Title", "Document Type", "Status",
               "Doc_Link", "Species")
