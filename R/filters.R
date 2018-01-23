@@ -10,11 +10,9 @@
 #' @importFrom dplyr filter
 #' @export
 filter_domestic <- function(df) {
-  if(!("u_s_or_foreign_listed" %in% names(df))) {
-    stop("Expects a data.frame from get_TECP_table.")
-  }
-  filt <- dplyr::filter(df, u_s_or_foreign_listed != "Foreign")
-  return(filt)
+  filt <- try(dplyr::filter(df, u_s_or_foreign_listed != "Foreign"))
+  if(class(filt)[1] != "try-error") return(filt)
+  stop("Expected 'TECP table'.")
 }
 
 #' Filter TECP_table to return only threatened and endangered species
@@ -29,12 +27,10 @@ filter_domestic <- function(df) {
 #' @importFrom dplyr filter
 #' @export
 filter_listed <- function(df) {
-  if(!("federal_listing_status" %in% names(df))) {
-    stop("Expects a data.frame from get_TECP_table.")
-  }
-  filt <- dplyr::filter(df, federal_listing_status == "Threatened" |
-                          federal_listing_status == "Endangered")
-  return(filt)
+  filt <- try(dplyr::filter(df, federal_listing_status == "Threatened" |
+                              federal_listing_status == "Endangered"))
+  if(class(filt) != "try-error") return(filt)
+  stop("Expects a 'TECP table'.")
 }
 
 #' Filter TECP_table to return only species from a given taxonomic group
